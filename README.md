@@ -1,24 +1,24 @@
 # WindowsPrivilegeEscalationVulnerabilityDisplayBox
-# 什么是WindowsPrivilegeEscalationVulnerabilityDisplayBox
+## 什么是WindowsPrivilegeEscalationVulnerabilityDisplayBox
 WindowsPrivilegeEscalationVulnerabilityDisplayBox是一个exe程序，为用户检测，演示Windows里面的提权漏洞<br>
 相信我，WindowsPrivilegeEscalationVulnerabilityDisplayBox是用来演示的(坏笑)<br>
 你反正拿WindowsPrivilegeEscalationVulnerabilityDisplayBox干什么我又不知道对不对QWQ
-# 提权漏洞是什么？
+## 提权漏洞是什么？
 提权漏洞就是：<br>
 系统、程序、服务、驱动里存在 bug   让攻击者 不该有高权限，却能拿到高权限<br>
 关键点：<br>
 不是“本来就有权限”，而是“不该有却拿到了”
-# 目前已实现的功能：
+## 目前已实现的功能：
 更改powershell运行策略<br>
 获取以administrator接管文件/文件夹的功能
-# 正在实现的功能：
+## 正在实现的功能：
 提权至SYSTEM<br>
 提权至trustedinstaller<br>
 不惊动UAC的情况下提权到Administrator
-# 有自己的想法吗？
+## 有自己的想法吗？
 欢迎提交Issues!
-# 发现BUG了吗？
+## 发现BUG了吗？
 欢迎提交Issues!
-# 本项目遵守GPL v3开源协议
+## 本项目遵守GPL v3开源协议
 这个工具的初衷就是让提权简单化，易于演示。我也深知GitHub上也有比我研究的更彻底，更完美的人，他们有更好方案<br>
 我也会努力学习滴~~~~
