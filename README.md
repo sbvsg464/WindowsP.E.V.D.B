@@ -1,1 +1,13 @@
-# Windows-
+# WindowsTQ
+什么是WindowsTQ，WindowsTQ是一个exe程序，专门应对Windows使用过程中需要的提权问题
+为什么Windows需要提权？不像Linux，root可以随便修改系统。Windows给予的Administrator权限在C:\和其他特殊情况下时受限，这个时候就需要提权来达到我们的目的
+目前已实现的功能：
+更改powershell运行策略
+获取以administrator接管文件/文件夹的功能
+正在实现的功能：
+提权至SYSTEM
+提权至trustedinstaller
+不惊动UAC的情况下提权到Administrator
+有自己的想法吗？欢迎提交Issues!
+发现BUG了吗？欢迎提交Issues!
+本项目遵守GPL v3开源协议
