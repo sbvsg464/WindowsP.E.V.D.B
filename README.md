@@ -27,9 +27,6 @@ educational and research purposes.
 > Any misuse or illegal use of this project is strictly prohibited.
 > The author takes no responsibility for any consequences resulting from its use.
 
-## Attention
-Actually, there is a controversy. The privilege command refers to "trustedinstaller", but "whoami" returns "SYSTEM". So, I ultimately decided to grant "SYSTEM" privileges.
-
 ## 中文
 ## 什么是WindowsPrivilegeEscalationVulnerabilityDisplayBox
 WindowsPrivilegeEscalationVulnerabilityDisplayBox是一个exe程序，为用户检测，演示Windows里面的提权漏洞<br>
@@ -49,8 +46,6 @@ WindowsPrivilegeEscalationVulnerabilityDisplayBox是一个exe程序，为用户�
 ## 免责声明
 > 本项目仅用于安全研究与漏洞演示，主要目的是帮助理解和预防相关安全问题。
 > 请勿将其用于任何非法用途，使用者需自行承担由此产生的风险。
-## 注意
-实际上，有争议，提权命令说的是trustedinstaller，但是whoami却返回的是SYSTEM，所以，我最终决定为有SYSTEM权限
 ## 有自己的想法吗？
 欢迎提交Issues!
 ## 发现BUG了吗？
