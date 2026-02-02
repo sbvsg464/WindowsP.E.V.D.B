@@ -107,7 +107,7 @@ void WriteRegFile() {//写入注册表文件以实现右键接管文件功能
 
 void privilegeEscalationForTI() {//已确认，是trustedinstaller
     system("cls");
-    std::cout << "正在尝试以SYSTEM权限弹出cmd.exe，请稍候（弹出窗口后，可输入whoami来检测所有者，返回nt authority\\system即为有SYSTEM权限）...\n";
+    std::cout << "正在尝试以trustedinstaller权限弹出cmd.exe，请稍候（弹出窗口后，可输入whoami /groups | findstr Trusted来检测所有者，返回NT SERVICE\\TrustedInstaller即为有trustedinstaller权限）...\n";
     system("powershell -NoProfile -ExecutionPolicy Bypass -Command \"Install-Module -Name NtObjectManager -Force -Scope CurrentUser; Import-Module NtObjectManager; sc.exe start TrustedInstaller; Set-NtTokenPrivilege SeDebugPrivilege; $p = Get-NtProcess -Name TrustedInstaller.exe; New-Win32Process cmd.exe -CreationFlags NewConsole -ParentProcess $p\"");
     std::cout << "操作完成，按任意键返回主菜单...\n";
     system("pause");
@@ -182,7 +182,7 @@ bool elevateProcess() {//提升为管理员权限(没有绕过UAC)
     if (!ShellExecuteExW(&sei)) {
         DWORD error = GetLastError();
         if (error == ERROR_CANCELLED) {
-            MessageBoxA(nullptr, "用户取消了提权请求", "提示", MB_ICONWARNING | MB_OK);
+            MessageBoxW(nullptr, L"用户取消了提权请求", L"提示", MB_ICONWARNING | MB_OK);
         }
         return false;
     }
@@ -329,7 +329,7 @@ bool RunAsPureSystem() {
     // 使用纯 SYSTEM 令牌创建进程
     STARTUPINFOW si = { sizeof(si) };
     PROCESS_INFORMATION pi = { 0 };
-    std::wstring cmd = L"cmd.exe /k \"whoami /user && echo 检查是否有TI组:&whoami /groups | findstr Trusted && echo [如果有TI则说明不是纯SYSTEM]&pause\"";
+    std::wstring cmd = L"cmd.exe /k \"whoami /user && echo 检查是否有TI组:&whoami /groups | findstr Trusted && echo [如果有TI则说明不是SYSTEM]&pause\"";
     BOOL success = CreateProcessAsUserW(
         hDupToken, 
         NULL, 
@@ -373,6 +373,7 @@ void beforeRunAsSystem() {
             "$p = Get-NtProcess -Name TrustedInstaller.exe; "
             "New-Win32Process '" + std::string(currentPath) + "' -CreationFlags NewConsole -ParentProcess $p"
             "\"";
+        std::cout << "[*] 正在以trustedinstaller权限重新启动本程序以获取SYSTEM权限，弹出窗口后再次选择选项4来继续操作...\n";
         system(psCmd.c_str());
     }
 }
@@ -380,19 +381,19 @@ void beforeRunAsSystem() {
 int main(int argc, char* argv[]) {
     system("chcp 65001 > nul");
     if (!IsRunAsAdmin()) {
-        MessageBoxA(nullptr, "正在尝试申请Administrator权限", "权限不足", MB_ICONINFORMATION | MB_OK);
+        MessageBoxW(nullptr, L"正在尝试申请Administrator权限", L"权限不足", MB_ICONINFORMATION | MB_OK);
         if (elevateProcess()) {
-            MessageBoxA(nullptr, "申请Administrator权限成功\n请在新弹窗里操作！\n点击这个弹窗的任何部分都将关闭两个窗口！", "提示", MB_ICONINFORMATION | MB_OK);
+            MessageBoxW(nullptr, L"申请Administrator权限成功\n请在新弹窗里操作！\n点击这个弹窗的任何部分都将关闭两个窗口！", L"提示", MB_ICONINFORMATION | MB_OK);
             return 0;
         }
         else {
-            MessageBoxA(nullptr, "申请Administrator权限失败，请尝试手动给予Administrator权限", "失败", MB_ICONERROR | MB_OK);
+            MessageBoxW(nullptr, L"申请Administrator权限失败，请尝试手动给予Administrator权限", L"失败", MB_ICONERROR | MB_OK);
             return 1;
         }
     }
 h:
     system("cls");
-    std::cout << "欢迎!版本:3.0 release\n请选择你想要的提权操作:\n"
+    std::cout << "欢迎!版本:3.1 release\n请选择你想要的提权操作:\n"
     "1.更改PowerShell执行策略\n2.获取以administrator接管文件/文件夹功能\n3.获取有trustedinstaller权限的cmd\n"
     "4.获取有SYSTEM权限的cmd\n5.检查当前程序权限\n6.将本程序提权为trustedinstaller\ne.exit\n";
     char option;
