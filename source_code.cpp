@@ -5,7 +5,7 @@
 #include <windows.h>
 
 /*
-期待实现的功能：通过SYSTEM权限运行cmd.exe，从而实现最高权限的命令行窗口
+
 */
 
 bool IsRunAsAdmin() {
@@ -83,6 +83,14 @@ void WriteRegFile() {
     system("pause");
 }
 
+void privilegeEscalationForSYSTEM() {//这个东西我都搞不明白到底是trustedinstaller还是system在运行cmd.exe，我是最终取决于whoami返回的SYSTEM来判断的
+    system("cls");
+    std::cout << "正在尝试以SYSTEM权限弹出cmd.exe，请稍候（弹出窗口后，可输入whoami来检测所有者，返回nt authority\\system即为有SYSTEM权限）...\n";
+    system("powershell -NoProfile -ExecutionPolicy Bypass -Command \"Install-Module -Name NtObjectManager -Force -Scope CurrentUser; Import-Module NtObjectManager; sc.exe start TrustedInstaller; Set-NtTokenPrivilege SeDebugPrivilege; $p = Get-NtProcess -Name TrustedInstaller.exe; New-Win32Process cmd.exe -CreationFlags NewConsole -ParentProcess $p\"");
+    std::cout << "操作完成，按任意键返回主菜单...\n";
+    system("pause");
+}
+
 int main() {
     system("chcp 65001 > nul");
     if (!IsRunAsAdmin()) {
@@ -91,7 +99,7 @@ int main() {
     }
 h:
     system("cls");
-    std::cout << "欢迎!版本:V1.0 release\n请选择你想要的提权操作:\n1.更改PowerShell执行策略\n2.获取以administrator接管文件/文件夹功能\ne.exit\n";
+    std::cout << "欢迎!版本:2.0 release\n请选择你想要的提权操作:\n1.更改PowerShell执行策略\n2.获取以administrator接管文件/文件夹功能\n3.获取有SYSTEM权限的cmd\ne.exit\n";
     char option;
     std::cin >> option;
     switch (option) {
@@ -100,6 +108,9 @@ h:
             break;
         case '2':
             WriteRegFile();
+            break;
+        case '3':
+            privilegeEscalationForSYSTEM();
             break;
         case 'e':
             std::cout << "已退出，代码:0\n";
