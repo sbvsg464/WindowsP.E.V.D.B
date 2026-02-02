@@ -22,7 +22,7 @@ educational and research purposes.
 - Elevate the permissions of this program to trustedintaller
 
 ## Planned Features
-- UAC bypass to Administrator
+- ~~UAC bypass to Administrator~~ Due to force majeure factors, this function will not be realized.
 
 ## A disclaimer
 > This project is intended for educational and security research purposes only.
@@ -46,7 +46,7 @@ WindowsPrivilegeEscalationVulnerabilityDisplayBox是一个exe程序，为用户�
 - 检测本程序的权限<br>
 - 将本程序提权到trustedintaller
 ## 正在实现的功能：
-- 不惊动UAC的情况下提权到Administrator
+- ~~不惊动UAC的情况下提权到Administrator~~ 由于不可抗力因素，这项功能将不会实现
 ## 免责声明
 > 本项目仅用于安全研究与漏洞演示，主要目的是帮助理解和预防相关安全问题。
 > 请勿将其用于任何非法用途，使用者需自行承担由此产生的风险。
