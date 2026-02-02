@@ -4,7 +4,8 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| V3.0 release  | :white_check_mark: |
+| V3.1 release  | :white_check_mark: |
+| V3.0 release | :x: |
 
 ## Reporting a Vulnerability
 当你反馈漏洞时，应确保你处于支持安全更新的版本，在上表未出现的版本均为结束安全更新的版本<br>
