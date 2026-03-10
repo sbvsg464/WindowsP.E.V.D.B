@@ -4,7 +4,8 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| V5.0 release  | :white_check_mark: |
+| V5.1 final release  | :white_check_mark: |
+| V5.0 release | :x: |
 | V4.0 release | :x: |
 | V3.1 release | :x: |
 | V3.0 release | :x: |
