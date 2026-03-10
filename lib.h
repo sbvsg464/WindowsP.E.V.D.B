@@ -69,8 +69,20 @@ void helpCenter() {
     "7.强开Administrator账户(支持Windows 10/11 Home): 在Windows 7 8 8.x 10 11中Administrator默认禁用状态(不是Administrator权限被禁用，是Administrator这个账户被禁用)\n"
     "8.让此账户获取指定文件夹的完全控制权限: 赋予此账户对指定文件夹的完全控制权限(如果操作失败，可以搭配功能2使用)\n"
     "9.打印所有特权进程: 列出当前系统中所有拥有特权令牌的进程及其对应的用户信息\n"
+    "a.关于本程序: 显示程序相关信息\n"
     "e.exit: 退出程序\n"
     "h.help: 显示此帮助信息\n";
     std::cout << "[+] 操作完成，按任意键返回主菜单...\n";
+    system("pause");
+}
+
+void about() {
+    system("cls");
+    std::cout << "关于本程序(WindowsPrivilegeEscalationVulnerabilityDisplayBox Version:5.1 Final Release):\n";
+    std::cout << "作者:3635177522(QQ号)\n";
+    std::cout << "语言，版本:C++20\n";
+    std::cout << "编译器:Visual Studio Code\n";
+    std::cout << "编译命令:cmd /c chcp 65001>nul && 【你的g++.exe路径】 -fdiagnostics-color=always -g 【源码路径】 -o 【生成的exe路径】-O3 -std=c++20 -ladvapi32 -luserenv -lwtsapi32 -Wpsabi -lnetapi32 -lwevtapi\n";
+    std::cout << "赞助:去我GitHub项目主页点个赞吧~链接:\\https://github.com/sbvsg464/WindowsPrivilegeEscalationVulnerabilityDisplayBox\n";
     system("pause");
 }
