@@ -27,7 +27,7 @@ educational and research purposes.
 
 ## Planned Features
 - ~~UAC bypass to Administrator~~ Due to force majeure factors, this function will not be realized.
-- Upgrade the program to a GUI (expected to be achieved in 2027)
+- Upgrade the program to a GUI (The GUI version has been released as a beta. Please obtain it from the Telegram channel yourself.)
 
 ## A disclaimer
 > This project is intended for educational and security research purposes only.
@@ -55,7 +55,7 @@ WindowsPrivilegeEscalationVulnerabilityDisplayBox是一个exe程序，为用户�
 - 打印所有特权进程
 ## 正在实现的功能：
 - ~~不惊动UAC的情况下提权到Administrator~~ 由于不可抗力因素，这项功能将不会实现<br>
-- 将程序升级为GUI（预计2027年实现）
+- 将程序升级为GUI（GUI 版本已经推出测试版请自行进入telegram频道里获取）
 ## 免责声明
 > 本项目仅用于安全研究与漏洞演示，主要目的是帮助理解和预防相关安全问题。
 > 请勿将其用于任何非法用途，使用者需自行承担由此产生的风险。
