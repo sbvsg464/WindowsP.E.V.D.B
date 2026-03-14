@@ -1,6 +1,6 @@
 
 # WindowsPrivilegeEscalationVulnerabilityDisplayBox
-- 频道/Channel（负责推送预览版，测试版，正式版/Responsible for pushing the preview version, the beta version and the official version.）:https://t.me/lsjrC8aQZeFNJJNJ \n
+- 频道/Channel（负责推送预览版，测试版，正式版/Responsible for pushing the preview version, the beta version and the official version.）:https://t.me/lsjrC8aQZeFNJJNJ
 **Language**: [English](#english) | [中文](#中文)
 
 ## English
