@@ -1,4 +1,6 @@
 
+# 在我获取到新设备之前，此仓库会保持归档状态
+
 # WindowsPrivilegeEscalationVulnerabilityDisplayBox
 **Language**: [English](#english) | [中文](#中文)
 
