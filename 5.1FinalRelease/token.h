@@ -96,12 +96,61 @@ bool EnableAdministrator() {
 
 PSID GetCurrentUserSid() {
     HANDLE token = nullptr;
-    OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token);
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
+        return nullptr;
+    }
     DWORD size = 0;
     GetTokenInformation(token, TokenUser, nullptr, 0, &size);
-    PTOKEN_USER user =
-        (PTOKEN_USER)malloc(size);
-    GetTokenInformation(token, TokenUser, user, size, &size);
+    if (size == 0) {
+        CloseHandle(token);
+        return nullptr;
+    }
+    PTOKEN_USER user = (PTOKEN_USER)malloc(size);
+    if (!user) {
+        CloseHandle(token);
+        return nullptr;
+    }
+    PSID resultSid = nullptr;
+    if (GetTokenInformation(token, TokenUser, user, size, &size)) {
+        if (IsValidSid(user->User.Sid)) {
+            DWORD sidLength = GetLengthSid(user->User.Sid);
+            resultSid = (PSID)LocalAlloc(LMEM_FIXED, sidLength);
+            if (resultSid) {
+                if (!CopySid(sidLength, resultSid, user->User.Sid)) {
+                    LocalFree(resultSid);
+                    resultSid = nullptr;
+                }
+            }
+        }
+    }
+    free(user);
     CloseHandle(token);
-    return user->User.Sid; // 注意：不要 free
+    return resultSid; 
+}
+
+bool RestoreOwnerToAdministrators(const std::wstring& path) {
+    PSID adminSid = nullptr;
+    SID_IDENTIFIER_AUTHORITY ntAuthority = SECURITY_NT_AUTHORITY;
+    bool success = false;
+    if (!AllocateAndInitializeSid(&ntAuthority, 2, 
+        SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 
+        0, 0, 0, 0, 0, 0, &adminSid)) {
+        return false;
+    }
+    DWORD res = SetNamedSecurityInfoW(
+        const_cast<LPWSTR>(path.c_str()),
+        SE_FILE_OBJECT,
+        OWNER_SECURITY_INFORMATION, // 明确指定修改所有者
+        adminSid,                   // 将新所有者设为管理员组
+        nullptr,
+        nullptr,
+        nullptr
+    );
+    if (res == ERROR_SUCCESS) {
+        success = true;
+    } else {
+        std::wcerr << L"[-] 更改所有者失败，错误码: " << res << std::endl;
+    }
+    if (adminSid) FreeSid(adminSid);
+    return success;
 }

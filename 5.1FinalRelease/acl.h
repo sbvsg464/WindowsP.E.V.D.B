@@ -4,19 +4,13 @@
 #include "lib.h"
 #include "token.h"
 
-bool GrantFullControlToCurrentUser(const std::wstring& path) {//授予完全控制权限
+bool GrantFullControlToCurrentUser(const std::wstring& path) {
     PSID userSid = GetCurrentUserSid();
     if (!userSid) return false;
-    EXPLICIT_ACCESSW ea{};
-    ea.grfAccessPermissions = GENERIC_ALL;
-    ea.grfAccessMode = GRANT_ACCESS;
-    ea.grfInheritance = SUB_CONTAINERS_AND_OBJECTS_INHERIT;
-    ea.Trustee.TrusteeForm = TRUSTEE_IS_SID;
-    ea.Trustee.TrusteeType = TRUSTEE_IS_USER;
-    ea.Trustee.ptstrName = (LPWSTR)userSid;
     PACL oldDacl = nullptr;
     PACL newDacl = nullptr;
     PSECURITY_DESCRIPTOR sd = nullptr;
+    bool success = false;
     DWORD res = GetNamedSecurityInfoW(
         path.c_str(),
         SE_FILE_OBJECT,
@@ -27,13 +21,28 @@ bool GrantFullControlToCurrentUser(const std::wstring& path) {//授予完全控�
         nullptr,
         &sd
     );
-    if (res != ERROR_SUCCESS)
-        return false;
+    if (res != ERROR_SUCCESS) {
+        if (sd) LocalFree(sd);
+        if (newDacl) LocalFree(newDacl);
+        if (userSid) LocalFree(userSid); 
+        return success;
+    }
+    EXPLICIT_ACCESSW ea{};
+    ea.grfAccessPermissions = GENERIC_ALL;
+    ea.grfAccessMode = GRANT_ACCESS;
+    ea.grfInheritance = SUB_CONTAINERS_AND_OBJECTS_INHERIT;
+    ea.Trustee.TrusteeForm = TRUSTEE_IS_SID;
+    ea.Trustee.TrusteeType = TRUSTEE_IS_USER;
+    ea.Trustee.ptstrName = (LPWSTR)userSid;
     res = SetEntriesInAclW(1, &ea, oldDacl, &newDacl);
-    if (res != ERROR_SUCCESS)
-        return false;
+    if (res != ERROR_SUCCESS) {
+        if (sd) LocalFree(sd);
+        if (newDacl) LocalFree(newDacl);
+        if (userSid) LocalFree(userSid); 
+        return success;
+    }
     res = SetNamedSecurityInfoW(
-        (LPWSTR)path.c_str(),
+        const_cast<LPWSTR>(path.c_str()), 
         SE_FILE_OBJECT,
         DACL_SECURITY_INFORMATION,
         nullptr,
@@ -41,9 +50,10 @@ bool GrantFullControlToCurrentUser(const std::wstring& path) {//授予完全控�
         newDacl,
         nullptr
     );
-    if (sd) LocalFree(sd);
-    if (newDacl) LocalFree(newDacl);
-    return res == ERROR_SUCCESS;
+    if (res == ERROR_SUCCESS) {
+        success = true;
+    }
+    return success;
 }
 
 void WriteRegFile() {//写入注册表文件以实现右键接管文件功能

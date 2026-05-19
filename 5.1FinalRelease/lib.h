@@ -20,6 +20,7 @@
 #include <Aclapi.h>
 #include <winevt.h>
 #include <tlhelp32.h>
+#include <accctrl.h>
 
 #pragma comment(lib, "wevtapi.lib")
 #pragma comment(lib, "advapi32.lib")

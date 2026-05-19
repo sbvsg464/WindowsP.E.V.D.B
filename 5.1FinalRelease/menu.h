@@ -11,7 +11,7 @@
 void ShowMainMenu() {
 here:
     system("cls");
-    std::cout << "欢迎!版本:5.1 Final release\n请选择你想要的提权操作:\n"
+    std::cout << "欢迎!版本:5.1.1 Final release\n请选择你想要的提权操作:\n"
     "1.更改PowerShell执行策略\n2.获取以administrator接管文件/文件夹功能\n3.获取有trustedinstaller权限的cmd\n"
     "4.获取有SYSTEM权限的cmd\n5.检查当前程序权限\n6.将本程序提权为trustedinstaller\n7.强开Administrator账户(支持Windows 10/11 Home)\n"
     "8.让此账户获取指定文件夹的完全控制权限\n9.打印所有特权进程\na.关于本程序\ne.exit\nh.help\n";
@@ -88,19 +88,21 @@ here:
                 goto here;
             }
         case '8':
-            {
-                system("cls");
-                std::cout << "请输入要赋予完全控制权限的文件夹路径(可带引号): ";
-                std::wstring folderPath;
-                std::wcin >> folderPath;
-                if (GrantFullControlToCurrentUser(folderPath)) {
-                    std::cout << "[+] 成功赋予当前用户对该文件夹的完全控制权限，按任意键返回主菜单...\n";
-                } else {
-                    std::cout << "[-] 赋予权限失败，可能是路径错误或权限不足，按任意键返回主菜单...\n";
-                }
-                system("pause");
-                goto here;
+        {
+            system("cls");
+            std::cout << "请输入要恢复并获取完全控制权限的文件夹路径: ";
+            std::wstring folderPath;
+            std::wcin >> folderPath;
+            std::cout << "[*] 正在尝试夺回文件所有权...\n";
+            RestoreOwnerToAdministrators(folderPath); 
+            if (GrantFullControlToCurrentUser(folderPath)) {
+                std::cout << "[+] 成功夺回所有权并赋予当前用户完全控制权限！\n";
+            } else {
+                std::cout << "[-] 赋予权限失败，请检查路径或尝试用选项6\n";
             }
+            system("pause");
+            goto here;
+        }
         case '9':
             EnumProcessTokens();
             system("pause");
