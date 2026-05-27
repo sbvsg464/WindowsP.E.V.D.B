@@ -1,0 +1,49 @@
+name: Windows G++ CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    # 1. 必须使用 Windows 运行环境
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. 配置 MSYS2 和 MinGW64 环境（提供最新的 g++ 编译器）
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: >-
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-toolchain
+
+    # 3. 使用你在 VS Code 中的相同参数进行编译
+    - name: Compile with G++
+      shell: msys2 {0}
+      run: |
+        g++ -fdiagnostics-color=always \
+            -g main.cpp \
+            -o my_privilege_tool.exe \
+            -O3 \
+            -std=c++20 \
+            -ladvapi32 \
+            -luserenv \
+            -lwtsapi32 \
+            -Wpsabi \
+            -lnetapi32 \
+            -lwevtapi
+
+    # 4. (可选) 将编译生成的 exe 存为构建产物，方便你在 GitHub 上直接下载
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: compiled-windows-executable
+        path: my_privilege_tool.exe
