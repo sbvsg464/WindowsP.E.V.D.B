@@ -1,7 +1,3 @@
-Here is the completely symmetrical version of your document. I have merged the unique information from both the English and Chinese versions so that they now mirror each other perfectly in structure, content, and formatting.
-
----
-
 # WindowsPrivilegeEscalationVulnerabilityDisplayBox
 
 **Language**: [English](https://www.google.com/search?q=%23english) | [中文](https://www.google.com/search?q=%23%E4%B8%AD%E6%96%87)
