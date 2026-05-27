@@ -1,6 +1,8 @@
 # WindowsPrivilegeEscalationVulnerabilityDisplayBox
 
-**Language**: [English](https://www.google.com/search?q=%23english) | [中文](https://www.google.com/search?q=%23%E4%B8%AD%E6%96%87)
+**Language**: [English](#English) | [中文](#中文)
+
+---
 
 ## English
 
@@ -37,7 +39,14 @@ It is not about "already having permissions," but rather "getting permissions yo
 
 ### Planned Features
 
-* ~~UAC bypass to Administrator~~ Due to force majeure factors, this feature will not be realized.
+* UAC bypass to Administrator
+* Support for English
+* Add the ability to launch programs with TrustedInstaller privileges
+
+### Regarding the Upcoming V6 Release
+
+The V6 version will be divided into Pro and Lite versions. The Pro version will feature a GUI, while the Lite version will not, but this does not mean the Pro version will be a paid release.
+I think the only difference between them is that the Lite version will receive updates faster, while the Pro version will update slower.
 
 ### Have your own ideas?
 
@@ -95,7 +104,14 @@ WindowsPrivilegeEscalationVulnerabilityDisplayBox是一个Windows可执行（exe
 
 ### 正在实现的功能
 
-* ~~不惊动UAC的情况下提权到Administrator~~ 由于不可抗力因素，这项功能将不会实现。
+* 不惊动UAC的情况下提权到Administrator
+* 支持英文
+* 添加以TrustedInstaller权限启动程序功能
+
+### 对于即将发布的V6版本
+
+V6版本将分为Pro和Lite版本，Pro版本拥有GUI，Lite没有，但这并不意味着Pro版本要收费。
+我想他们唯一的区别就是Lite更新的快，Pro更新的慢吧。
 
 ### 有自己的想法吗？
 
