@@ -3,7 +3,7 @@
 
 #include "lib.h"
 
-bool IsRunAsAdmin() {//检测是否为管理员
+bool IsRunAsAdmin() {
     BOOL isAdmin = FALSE;
     PSID adminGroup = nullptr;
     SID_IDENTIFIER_AUTHORITY ntAuthority = SECURITY_NT_AUTHORITY;
@@ -16,7 +16,7 @@ bool IsRunAsAdmin() {//检测是否为管理员
     return isAdmin;
 }
 
-bool IsTrustedInstaller() {//检测是否为trustedinstaller权限
+bool IsTrustedInstaller() {
     HANDLE hToken;
     if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken))
         return false;
@@ -51,7 +51,7 @@ bool IsAdministratorDisabled() {
     return disabled;
 }
 
-bool IsSystem() {//检测是否为system权限
+bool Issystem() {
     HANDLE hToken = NULL;
     DWORD dwLength = 0;
     PTOKEN_USER pTokenUser = NULL;
@@ -82,7 +82,7 @@ bool IsSystem() {//检测是否为system权限
 
 bool EnableAdministrator() {
     USER_INFO_1008 info{};
-    info.usri1008_flags = UF_SCRIPT; // 不包含 UF_ACCOUNTDISABLE
+    info.usri1008_flags = UF_SCRIPT; 
     DWORD err = 0;
     NET_API_STATUS status = NetUserSetInfo(
         nullptr,
@@ -140,8 +140,8 @@ bool RestoreOwnerToAdministrators(const std::wstring& path) {
     DWORD res = SetNamedSecurityInfoW(
         const_cast<LPWSTR>(path.c_str()),
         SE_FILE_OBJECT,
-        OWNER_SECURITY_INFORMATION, // 明确指定修改所有者
-        adminSid,                   // 将新所有者设为管理员组
+        OWNER_SECURITY_INFORMATION, 
+        adminSid,                   
         nullptr,
         nullptr,
         nullptr
@@ -149,7 +149,7 @@ bool RestoreOwnerToAdministrators(const std::wstring& path) {
     if (res == ERROR_SUCCESS) {
         success = true;
     } else {
-        std::wcerr << L"[-] 更改所有者失败，错误码: " << res << std::endl;
+        std::wcerr << msg_owner_change_failed << res << std::endl;
     }
     if (adminSid) FreeSid(adminSid);
     return success;

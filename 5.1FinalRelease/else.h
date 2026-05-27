@@ -42,7 +42,7 @@ void EnumProcessTokens() {
                         &domainLen,
                         &use
                     )) {
-                        wprintf(L"[PID %-5u] %-25ls -> %ls\\%ls\n",
+                        wprintf(msg_process_token_info.c_str(),
                         pe.th32ProcessID,
                         pe.szExeFile,
                         domain,

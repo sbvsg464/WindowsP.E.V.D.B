@@ -1,15 +1,19 @@
+//main.cpp
 #include "menu.h"
 
+/*将stdlib.h stdio.h改为C++风格的cstdlib cstdio 支持英语 
+删减lib.h中多余字符串 提权至trustedinstaller SYSTEM权限添加请等待提示*/
 int main() {
-    system("chcp 65001 > nul");
+    std::system("chcp 65001 > nul");
+    language();
     if (!IsRunAsAdmin()) {
-        MessageBoxW(nullptr, L"正在尝试申请Administrator权限", L"权限不足", MB_ICONINFORMATION | MB_OK);
+        MessageBoxW(nullptr, msg_admin_req_body.c_str(), msg_admin_req_title.c_str(), MB_ICONINFORMATION | MB_OK);
         if (elevateProcess()) {
-            MessageBoxW(nullptr, L"申请Administrator权限成功\n请在新弹窗里操作！\n点击这个弹窗的任何部分都将关闭两个窗口！", L"提示", MB_ICONINFORMATION | MB_OK);
+            MessageBoxW(nullptr, msg_admin_success_body.c_str(), msg_tips_title.c_str(), MB_ICONINFORMATION | MB_OK);
             return 0;
         }
         else {
-            MessageBoxW(nullptr, L"申请Administrator权限失败，请尝试手动给予Administrator权限", L"失败", MB_ICONERROR | MB_OK);
+            MessageBoxW(nullptr, msg_admin_fail_body.c_str(), msg_failed_title.c_str(), MB_ICONERROR | MB_OK);
             return 1;
         }
     }

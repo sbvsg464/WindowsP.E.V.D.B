@@ -1,18 +1,18 @@
-// SYSTEM.h
+// system.h
 #pragma once
 
 #include "lib.h"
 #include "token.h"
 
-void privilegeEscalationForTI() {//已确认，是trustedinstaller
-    system("cls");
-    std::cout << "[+] 正在尝试以trustedinstaller权限弹出cmd.exe，请稍候（弹出窗口后，可输入whoami /groups | findstr Trusted来检测所有者，返回NT SERVICE\\TrustedInstaller即为有trustedinstaller权限）...\n";
-    system("powershell -NoProfile -ExecutionPolicy Bypass -Command \"Install-Module -Name NtObjectManager -Force -Scope CurrentUser; Import-Module NtObjectManager; sc.exe start TrustedInstaller; Set-NtTokenPrivilege SeDebugPrivilege; $p = Get-NtProcess -Name TrustedInstaller.exe; New-Win32Process cmd.exe -CreationFlags NewConsole -ParentProcess $p\"");
-    std::cout << "[+] 操作完成，按任意键返回主菜单...\n";
-    system("pause");
+void privilegeEscalationForTI() {
+    std::system("cls");
+    std::cout << msg_ti_cmd_wait;
+    std::system("powershell -NoProfile -ExecutionPolicy Bypass -Command \"Install-Module -Name NtObjectManager -Force -Scope CurrentUser; Import-Module NtObjectManager; sc.exe start TrustedInstaller; Set-NtTokenPrivilege SeDebugPrivilege; $p = Get-NtProcess -Name TrustedInstaller.exe; New-Win32Process cmd.exe -CreationFlags NewConsole -ParentProcess $p\"");
+    std::cout << msg_operation_completed;
+    std::system("pause");
 }
 
-bool elevateProcess() {//提升为管理员权限(没有绕过UAC)
+bool elevateProcess() {
     WCHAR exePath[MAX_PATH];
     if (!GetModuleFileNameW(NULL, exePath, MAX_PATH)) {
         return false;
@@ -26,14 +26,14 @@ bool elevateProcess() {//提升为管理员权限(没有绕过UAC)
     if (!ShellExecuteExW(&sei)) {
         DWORD error = GetLastError();
         if (error == ERROR_CANCELLED) {
-            MessageBoxW(nullptr, L"用户取消了提权请求", L"提示", MB_ICONWARNING | MB_OK);
+            MessageBoxW(nullptr, msg_user_canceled_elevation.c_str(), msg_tips_title.c_str(), MB_ICONWARNING | MB_OK);
         }
         return false;
     }
     return true;
 }
 
-bool EnablePrivilege(LPCTSTR privilegeName) {//开启调试
+bool EnablePrivilege(LPCTSTR privilegeName) {
     HANDLE hToken;
     TOKEN_PRIVILEGES tp;
     LUID luid;
@@ -52,21 +52,18 @@ bool EnablePrivilege(LPCTSTR privilegeName) {//开启调试
     return result && (GetLastError() == ERROR_SUCCESS);
 }
 
-// 检查是否为纯 SYSTEM（是 SYSTEM 但不包含 TrustedInstaller 组）
-bool IsPureSystemProcess(DWORD pid) {
+bool IsPuresystemProcess(DWORD pid) {
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
     if (!hProcess) return false;
     HANDLE hToken = NULL;
-    bool isPureSystem = false;
+    bool isPuresystem = false;
     if (OpenProcessToken(hProcess, TOKEN_QUERY, &hToken)) {
-        // 检查是否为 SYSTEM (S-1-5-18)
         DWORD len = 0;
         GetTokenInformation(hToken, TokenUser, NULL, 0, &len);
         std::vector<BYTE> buffer(len);
         if (GetTokenInformation(hToken, TokenUser, buffer.data(), len, &len)) {
             PTOKEN_USER pUser = (PTOKEN_USER)buffer.data();
             if (IsWellKnownSid(pUser->User.Sid, WinLocalSystemSid)) {
-                // 是 SYSTEM，现在检查组中是否有 TrustedInstaller (S-1-5-80-...)
                 GetTokenInformation(hToken, TokenGroups, NULL, 0, &len);
                 buffer.resize(len);
                 if (GetTokenInformation(hToken, TokenGroups, buffer.data(), len, &len)) {
@@ -83,25 +80,22 @@ bool IsPureSystemProcess(DWORD pid) {
                             LocalFree(sidStr);
                         }
                     }
-                    // 是 SYSTEM 且没有 TI 组 = 纯 SYSTEM
-                    isPureSystem = !hasTI;
+                    isPuresystem = !hasTI;
                 }
             }
         }
         CloseHandle(hToken);
     }
     CloseHandle(hProcess);
-    return isPureSystem;
+    return isPuresystem;
 }
 
-// 获取 services.exe 的 PID（通常是纯 SYSTEM）
-DWORD FindPureSystemProcess() {
+DWORD FindPuresystemProcess() {
     DWORD processes[1024], cbNeeded;
     if (!EnumProcesses(processes, sizeof(processes), &cbNeeded))
         return 0;
     for (unsigned i = 0; i < cbNeeded / sizeof(DWORD); i++) {
         if (processes[i] == 0) continue;
-        // 打开进程查询名称
         HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processes[i]);
         if (!hProcess) continue;
         WCHAR szProcessName[MAX_PATH] = L"<unknown>";
@@ -109,17 +103,15 @@ DWORD FindPureSystemProcess() {
         DWORD cbNeededMod;
         if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeededMod)) {
             GetModuleBaseNameW(hProcess, hMod, szProcessName, sizeof(szProcessName)/sizeof(WCHAR));
-            // 优先查找 services.exe（纯 SYSTEM 且稳定存在）
             if (_wcsicmp(szProcessName, L"services.exe") == 0) {
-                if (IsPureSystemProcess(processes[i])) {
+                if (IsPuresystemProcess(processes[i])) {
                     CloseHandle(hProcess);
                     return processes[i];
                 }
             }
-            // 备选：wininit.exe, winlogon.exe
             else if ((_wcsicmp(szProcessName, L"wininit.exe") == 0 ||
                      _wcsicmp(szProcessName, L"winlogon.exe") == 0) && 
-                     IsPureSystemProcess(processes[i])) {
+                     IsPuresystemProcess(processes[i])) {
                 CloseHandle(hProcess);
                 return processes[i];
             }
@@ -130,48 +122,45 @@ DWORD FindPureSystemProcess() {
 }
 
 bool RunAsPureSystem() {
-    system("pause");
-    // 必须启用调试权限才能打开 SYSTEM 进程
+    std::system("pause");
     if (!EnablePrivilege(SE_DEBUG_NAME)) {
-        std::cerr << "[-] 启用 SeDebugPrivilege 失败\n";
+        std::cerr << msg_se_debug_failed;
         return false;
     }
-    EnablePrivilege(SE_DEBUG_NAME);              // 打开进程
-    EnablePrivilege(SE_IMPERSONATE_NAME);        // 模拟（备用方案需要）
+    EnablePrivilege(SE_DEBUG_NAME);
+    EnablePrivilege(SE_IMPERSONATE_NAME);
     EnablePrivilege(SE_ASSIGNPRIMARYTOKEN_NAME);
-    DWORD pid = FindPureSystemProcess();
+    DWORD pid = FindPuresystemProcess();
     if (pid == 0) {
-        std::cerr << "[-] 未找到纯 SYSTEM 进程\n";
+        std::cerr << msg_pure_system_not_found;
         return false;
     }
-    std::cout << "[+] 找到纯净的 SYSTEM 进程 PID: " << pid << "\n";
+    std::cout << msg_pure_system_found_pid << pid << "\n";
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
     if (!hProcess) {
-        std::cerr << "[-] OpenProcess 失败: " << GetLastError() << "\n";
+        std::cerr << msg_open_process_failed << GetLastError() << "\n";
         return false;
     }
     HANDLE hToken = NULL;
     if (!OpenProcessToken(hProcess, TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY | TOKEN_QUERY, &hToken)) {
-        std::cerr << "[-] OpenProcessToken 失败: " << GetLastError() << "\n";
+        std::cerr << msg_open_process_token_failed << GetLastError() << "\n";
         CloseHandle(hProcess);
         return false;
     }
     HANDLE hDupToken = NULL;
     if (!DuplicateTokenEx(hToken, MAXIMUM_ALLOWED, NULL, SecurityImpersonation, TokenPrimary, &hDupToken)) {
-        std::cerr << "[-] DuplicateTokenEx 失败: " << GetLastError() << "\n";
+        std::cerr << msg_duplicate_token_failed << GetLastError() << "\n";
         CloseHandle(hToken);
         CloseHandle(hProcess);
         return false;
     }
-    // 设置 Session ID
     DWORD sessionId = WTSGetActiveConsoleSessionId();
     if (sessionId != 0xFFFFFFFF) {
         SetTokenInformation(hDupToken, TokenSessionId, &sessionId, sizeof(sessionId));
     }
-    // 使用纯 SYSTEM 令牌创建进程
     STARTUPINFOW si = { sizeof(si) };
     PROCESS_INFORMATION pi = { 0 };
-    std::wstring cmd = L"cmd.exe /k \"whoami /user && echo 检查是否有TI组:&whoami /groups | findstr Trusted && echo [如果有TI则说明不是SYSTEM]&pause\"";
+    std::wstring cmd = L"cmd.exe /k \"whoami /user && echo 检查是否有TI组:&whoami /groups | findstr Trusted && echo [如果有TI则说明不是std::system]&pause\"";
     BOOL success = CreateProcessAsUserW(
         hDupToken, 
         NULL, 
@@ -185,9 +174,9 @@ bool RunAsPureSystem() {
         &pi
     );
     if (!success) {
-        std::cerr << "[-] CreateProcessAsUserW 失败: " << GetLastError() << "\n";
+        std::cerr << msg_create_process_failed << GetLastError() << "\n";
     } else {
-        std::cout << "[+] 成功创建纯 SYSTEM 进程，PID: " << pi.dwProcessId << "\n";
+        std::cout << msg_pure_system_success_pid << pi.dwProcessId << "\n";
         CloseHandle(pi.hProcess);
         CloseHandle(pi.hThread);
     }
@@ -197,11 +186,11 @@ bool RunAsPureSystem() {
     return success;
 }
 
-void beforeRunAsSystem() {
-    system("cls");
-    std::cout << "[+] 请稍等\n";
+void beforeRunAssystem() {
+    std::system("cls");
+    std::cout << msg_please_wait;
     if (IsTrustedInstaller()) {
-        std::cout << "[*] 当前已经是trustedinstaller权限\n";
+        std::cout << msg_already_ti;
         RunAsPureSystem();
         return;
     } else {
@@ -215,7 +204,7 @@ void beforeRunAsSystem() {
             "$p = Get-NtProcess -Name TrustedInstaller.exe; "
             "New-Win32Process '" + std::string(currentPath) + "' -CreationFlags NewConsole -ParentProcess $p"
             "\"";
-        std::cout << "[*] 正在以trustedinstaller权限重新启动本程序以获取SYSTEM权限，弹出窗口后再次选择选项4来继续操作...\n";
-        system(psCmd.c_str());
+        std::cout << msg_restarting_for_system;
+        std::system(psCmd.c_str());
     }
 }
