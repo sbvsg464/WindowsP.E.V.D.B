@@ -154,3 +154,20 @@ bool RestoreOwnerToAdministrators(const std::wstring& path) {
     if (adminSid) FreeSid(adminSid);
     return success;
 }
+
+HANDLE Custom_GetCurrentPrimaryToken() {
+    HANDLE hCurrentToken = NULL;
+    HANDLE hPrimaryToken = NULL;
+    if (OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_QUERY, &hCurrentToken)) {
+        DuplicateTokenEx(
+            hCurrentToken, 
+            MAXIMUM_ALLOWED, 
+            NULL, 
+            SecurityImpersonation, 
+            TokenPrimary, 
+            &hPrimaryToken
+        );
+        CloseHandle(hCurrentToken);
+    }
+    return hPrimaryToken; 
+}

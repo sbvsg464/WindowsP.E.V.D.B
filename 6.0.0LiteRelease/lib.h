@@ -22,6 +22,7 @@
 #include <winevt.h>
 #include <tlhelp32.h>
 #include <accctrl.h>
+#include <userenv.h>
 
 #pragma comment(lib, "wevtapi.lib")
 #pragma comment(lib, "advapi32.lib")
@@ -44,7 +45,7 @@
 std::string msg_welcome = "欢迎!版本:6.0.0 Lite\n请选择你想要的提权操作:\n"
     "1.更改PowerShell执行策略\n2.获取以administrator接管文件/文件夹功能\n3.获取有trustedinstaller权限的cmd\n"
     "4.获取有system权限的cmd\n5.检查当前程序权限\n6.将本程序提权为trustedinstaller\n7.强开Administrator账户(支持Windows 10/11 Home)\n"
-    "8.让此账户获取指定文件夹的完全控制权限\n9.打印所有特权进程\na.关于本程序\ne.exit\nh.help\n";
+    "8.让此账户获取指定文件夹的完全控制权限\n9.打印所有特权进程\n0.以本程序权限唤醒指定exe\na.关于本程序\ne.exit\nh.help\n";
 std::wstring msg_admin_req_body = L"正在尝试申请Administrator权限";
 std::wstring msg_admin_req_title = L"权限不足";
 std::wstring msg_admin_success_body = L"申请Administrator权限成功\n请在新弹窗里操作！\n点击这个弹窗的任何部分都将关闭两个窗口！";
@@ -68,6 +69,7 @@ std::string msg_help_text = "帮助中心(介绍什么时候他们有用):\n"
     "7.强开Administrator账户(支持Windows 10/11 Home): 在Windows 7 8 8.x 10 11中Administrator默认禁用状态(不是Administrator权限被禁用，是Administrator这个账户被禁用)\n"
     "8.让此账户获取指定文件夹的完全控制权限: 赋予此账户对指定文件夹的完全控制权限(如果操作失败，可以搭配功能2使用)\n"
     "9.打印所有特权进程: 列出当前系统中所有拥有特权令牌的进程及其对应的用户信息\n"
+    "0.以本程序权限唤醒指定exe: 使用当前程序权限启动指定的可执行文件\n"
     "a.关于本程序: 显示程序相关信息\n"
     "e.exit: 退出程序\n"
     "h.help: 显示此帮助信息\n";
@@ -105,6 +107,11 @@ std::wstring msg_exit_confirm_body = L"不要退出好不好，我想一直陪�
 std::wstring msg_exit_confirm_title = L"要退出了喵!";
 std::string msg_exited_code_0 = "[+] 已退出，代码:0\n";
 std::wstring msg_process_token_info = L"[PID %-5u] %-25ls -> %ls\\%ls\n";
+std::string msg_create_privileged_process = "[+] 成功创建特权进程，PID: ";
+std::string msg_env_block_failed = "[-] CreateEnvironmentBlock 失败，尝试无环境变量启动...\n";
+std::string msg_invalid_token_path = "[-] 无效的令牌句柄或可执行文件路径\n";
+std::string msg_enter_exe_path = "请输入要执行的程序路径(例如: C:\\Windows\\System32\\cmd.exe): ";
+std::string msg_ti_success_hint_2 = "如果是以TI权限启动的，输入whoami /groups | findstr Trusted\n有 NT SERVICE\\TrustedInstaller 行，说明成功获取了TI权限\n";
 
 std::string msg_reg_content = R"(Windows Registry Editor Version 5.00
 
@@ -138,7 +145,8 @@ inline void language() {
         msg_welcome = "Welcome! Version: 6.0.0 Lite\nPlease select the privilege escalation operation you want:\n"
         "1. Change PowerShell Execution Policy\n2. Gain administrator ownership of files/folders\n3. Get cmd with TrustedInstaller privileges\n"
         "4. Get cmd with system privileges\n5. Check current program privileges\n6. Elevate this program to TrustedInstaller\n7. Force enable Administrator account (supports Windows 10/11 Home)\n"
-        "8. Grant this account full control permissions for a specified folder\n9. List all privileged processes\na. About this program\ne. Exit\nh. Help\n";
+        "8. Grant this account full control permissions for a specified folder\n9. List all privileged processes\n0. Launch specified exe with current privileges\n"
+        "a. About this program\ne. Exit\nh. Help\n";
         msg_admin_req_body = L"Attempting to request Administrator privileges";
         msg_admin_req_title = L"Insufficient privileges";
         msg_admin_success_body = L"Successfully requested Administrator privileges\nPlease operate in the new popup!\nClicking any part of this window will close both windows!";
@@ -162,6 +170,7 @@ inline void language() {
         "7. Force enable Administrator account (Supports Windows 10/11 Home): The Administrator account is disabled by default in Windows 7, 8, 8.x, 10, 11.\n"
         "8. Grant this account full control of a specified folder: Give this account full control permissions for a specified folder (If it fails, use with function 2).\n"
         "9. List all privileged processes: List all processes with privileged tokens and their corresponding user information in the current system.\n"
+        "0. Launch specified exe with current privileges: Start a specified executable file with the current program's privileges.\n"
         "a. About this program: Show program information.\n"
         "e. exit: Exit the program.\n"
         "h. help: Show this help message.\n";
@@ -199,6 +208,10 @@ inline void language() {
         msg_exit_confirm_title = L"Exiting meow!";
         msg_exited_code_0 = "[+] Exited, code: 0\n";
         msg_process_token_info = L"[PID %-5u] %-25ls -> %ls\\%ls\n";
+        msg_create_privileged_process = "[+] Successfully created privileged process, PID: ";
+        msg_env_block_failed = "[-] CreateEnvironmentBlock failed, trying to launch without environment variables...\n";
+        msg_invalid_token_path = "[-] Invalid token handle or executable file path\n";
+        msg_enter_exe_path = "请输入要执行的程序路径(例如: C:\\Windows\\System32\\cmd.exe): ";
 
         msg_reg_content = R"(Windows Registry Editor Version 5.00
 

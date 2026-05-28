@@ -208,3 +208,43 @@ void beforeRunAssystem() {
         std::system(psCmd.c_str());
     }
 }
+
+bool LaunchProcessWithToken(HANDLE hPrimaryToken, const std::wstring& exePath) {
+    if (hPrimaryToken == NULL || exePath.empty()) {
+        std::cout << msg_invalid_token_path;
+        return false;
+    }
+    STARTUPINFOW si = { sizeof(si) };
+    PROCESS_INFORMATION pi = { 0 };
+    std::wstring desktopName = L"winsta0\\default";
+    si.lpDesktop = &desktopName[0];
+    std::wstring cmdLine = exePath;
+    LPVOID pEnvBlock = NULL;
+    if (!CreateEnvironmentBlock(&pEnvBlock, hPrimaryToken, FALSE)) {
+        std::cout << msg_env_block_failed;
+    }
+    BOOL bResult = CreateProcessAsUserW(
+        hPrimaryToken,
+        NULL,
+        &cmdLine[0],
+        NULL,
+        NULL,
+        FALSE,
+        CREATE_UNICODE_ENVIRONMENT | CREATE_NEW_CONSOLE, 
+        pEnvBlock,
+        NULL, 
+        &si,
+        &pi
+    );
+    if (bResult) {
+        std::cout << msg_create_privileged_process << pi.dwProcessId << std::endl;
+        CloseHandle(pi.hThread);
+        CloseHandle(pi.hProcess);
+    } else {
+        std::cout << msg_create_process_failed << GetLastError() << std::endl;
+    }
+    if (pEnvBlock) {
+        DestroyEnvironmentBlock(pEnvBlock);
+    }
+    return bResult != FALSE;
+}

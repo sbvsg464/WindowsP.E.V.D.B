@@ -106,6 +106,22 @@ here:
             EnumProcessTokens();
             std::system("pause");
             goto here;
+        case '0':
+            {
+                HANDLE hToken = Custom_GetCurrentPrimaryToken();
+                if (!hToken) {
+                    std::cout << msg_invalid_token_path;
+                    std::system("pause");
+                    goto here;
+                }
+                std::wstring pach;
+                std::cout << msg_enter_exe_path;
+                std::wcin >> pach;
+                LaunchProcessWithToken(hToken, pach);
+                std::cout << msg_ti_success_hint_2;
+            }
+            std::system("pause");
+            goto here;
         case 'e':
             {
                 int ret = MessageBoxW(nullptr, msg_exit_confirm_body.c_str(), msg_exit_confirm_title.c_str(), MB_ICONINFORMATION | MB_OKCANCEL);
