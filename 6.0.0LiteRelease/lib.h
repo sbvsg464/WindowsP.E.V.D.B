@@ -42,6 +42,34 @@
 #define SE_IMPERSONATE_NAME TEXT("SeImpersonatePrivilege")
 #endif
 
+inline std::wstring ExpectedArchStr;
+inline std::wstring CurrentArchStr;
+
+inline bool CheckNativeArchitecture() {
+    SYSTEM_INFO sysInfo;
+    GetNativeSystemInfo(&sysInfo);
+    WORD hostArch = sysInfo.wProcessorArchitecture;
+    if (hostArch == PROCESSOR_ARCHITECTURE_AMD64) CurrentArchStr = L"X86_64";
+    else if (hostArch == PROCESSOR_ARCHITECTURE_ARM64) CurrentArchStr = L"ARM64";
+    else if (hostArch == PROCESSOR_ARCHITECTURE_INTEL) CurrentArchStr = L"X86_i386";
+    else CurrentArchStr = L"Unknown";
+    WORD processArch;
+#if defined(_M_X64) || defined(__x86_64__)
+    processArch = PROCESSOR_ARCHITECTURE_AMD64; 
+    ExpectedArchStr = L"X86_64";
+#elif defined(_M_ARM64) || defined(__aarch64__)
+    processArch = PROCESSOR_ARCHITECTURE_ARM64;
+    ExpectedArchStr = L"ARM64";
+#elif defined(_M_IX86) || defined(__i386__)
+    processArch = PROCESSOR_ARCHITECTURE_INTEL;
+    ExpectedArchStr = L"X86_i386";
+#else
+    processArch = PROCESSOR_ARCHITECTURE_UNKNOWN;
+    ExpectedArchStr = L"Unknown";
+#endif
+    return hostArch == processArch;
+}
+
 struct LanguagePack {
     std::string welcome;
     std::wstring admin_req_body;
@@ -94,6 +122,10 @@ struct LanguagePack {
     std::string enter_exe_path;
     std::string ti_success_hint_2;
     std::string reg_content;
+    std::wstring arch_mismatch_title;
+    std::wstring arch_mismatch_body;
+    std::wstring ExpectedArch;
+    std::wstring CurrentArch;
 };
 
 inline const LanguagePack LangCN = {
@@ -128,7 +160,7 @@ C++(最好的编程语言!)
 Visual Studio Code(宇宙最强的平台!)
 Google Gemini && Microsoft Github Copilot(最强大的AI!)
 
-编译命令:cmd /c chcp 65001>nul && 【你的g++.exe路径】 -fdiagnostics-color=always -g 【你的main.cpp路径】 -o 【你的生成的exe路径】 -std=c++26 -std=c23 -ladvapi32 -luserenv -lwtsapi32 -Wpsabi -lnetapi32 -lwevtapi -static-libgcc -static-libstdc++
+编译命令:cmd /c chcp 65001>nul && 【你的g++.exe路径】 -fdiagnostics-color=always -s 【你的main.cpp路径】 -o 【你的生成的exe路径】 -O3 -std=c++20 -ladvapi32 -luserenv -lwtsapi32 -Wpsabi -lnetapi32 -lwevtapi -static-libgcc -static-libstdc++
 赞助:去我GitHub项目主页点个赞吧~链接:\https://github.com/sbvsg464/WindowsPrivilegeEscalationVulnerabilityDisplayBox
 )",
     .help_text = R"(帮助中心(介绍什么时候他们有用):
@@ -208,7 +240,11 @@ h.help: 显示此帮助信息
 [HKEY_CLASSES_ROOT\Directory\shell\runas\command]
 @="cmd.exe /c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant administrators:F /t"
 "IsolatedCommand"="cmd.exe /c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant administrators:F /t"
-)"
+)",
+    .arch_mismatch_title = L"致命错误!",
+    .arch_mismatch_body = L"此程序的架构与系统架构不匹配",
+    .ExpectedArch = L"期望架构: ",
+    .CurrentArch = L"系统架构: "
 };
 
 inline const LanguagePack LangEN = {
@@ -243,7 +279,7 @@ C++ (The Best Programming Language!)
 Visual Studio Code (The Most Powerful IDE!)
 Google Gemini && Microsoft Github Copilot(The Most Powerful AI!)
 
-Build Command: cmd /c chcp 65001>nul && [Your g++.exe Path] -fdiagnostics-color=always -g [Your main.cpp Path] -o [Your generated exe Path] -std=c++26 -std=c23 -ladvapi32 -luserenv -lwtsapi32 -Wpsabi -lnetapi32 -lwevtapi -static-libgcc -static-libstdc++
+Build Command: cmd /c chcp 65001>nul && 【Your g++.exe Path】 -fdiagnostics-color=always -s 【Your main.cpp Path】 -o 【Your Output exe Path】 -O3 -std=c++20 -ladvapi32 -luserenv -lwtsapi32 -Wpsabi -lnetapi32 -lwevtapi -static-libgcc -static-libstdc++
 Support: Please star my GitHub project~ Link: https://github.com/sbvsg464/WindowsPrivilegeEscalationVulnerabilityDisplayBox
 )",
     .help_text = R"(Help Center (Explains when they are useful):
@@ -323,7 +359,11 @@ h. help: Show this help message.
 [HKEY_CLASSES_ROOT\Directory\shell\runas\command]
 @="cmd.exe /c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant administrators:F /t"
 "IsolatedCommand"="cmd.exe /c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant administrators:F /t"
-)REG"
+)REG",
+    .arch_mismatch_title = L"Fatal Error!",
+    .arch_mismatch_body = L"This program's architecture does not match the system architecture. Expected: ARM64 Current: ",
+    .ExpectedArch = L"Expected Architecture: ",
+    .CurrentArch = L"Current Architecture: "
 };
 
 inline LanguagePack CurrentLang = LangCN;
@@ -379,6 +419,10 @@ inline std::string& msg_invalid_token_path = CurrentLang.invalid_token_path;
 inline std::string& msg_enter_exe_path = CurrentLang.enter_exe_path;
 inline std::string& msg_ti_success_hint_2 = CurrentLang.ti_success_hint_2;
 inline std::string& msg_reg_content = CurrentLang.reg_content;
+inline std::wstring& msg_arch_mismatch_title = CurrentLang.arch_mismatch_title;
+inline std::wstring& msg_arch_mismatch_body = CurrentLang.arch_mismatch_body;
+inline std::wstring& ExpectedArch = CurrentLang.ExpectedArch;
+inline std::wstring& CurrentArch = CurrentLang.CurrentArch;
 
 inline bool isEnglishSystem() {
     return GetUserDefaultUILanguage() == 0x0409;
