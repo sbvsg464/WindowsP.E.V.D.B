@@ -243,8 +243,8 @@ h.help: 显示此帮助信息
 )",
     .arch_mismatch_title = L"致命错误!",
     .arch_mismatch_body = L"此程序的架构与系统架构不匹配",
-    .ExpectedArch = L"期望架构: ",
-    .CurrentArch = L"系统架构: "
+    .ExpectedArch = L" 期望架构: ",
+    .CurrentArch = L" 系统架构: "
 };
 
 inline const LanguagePack LangEN = {
@@ -362,8 +362,8 @@ h. help: Show this help message.
 )REG",
     .arch_mismatch_title = L"Fatal Error!",
     .arch_mismatch_body = L"This program's architecture does not match the system architecture. Expected: ARM64 Current: ",
-    .ExpectedArch = L"Expected Architecture: ",
-    .CurrentArch = L"Current Architecture: "
+    .ExpectedArch = L" Expected Architecture: ",
+    .CurrentArch = L" Current Architecture: "
 };
 
 inline LanguagePack CurrentLang = LangCN;
