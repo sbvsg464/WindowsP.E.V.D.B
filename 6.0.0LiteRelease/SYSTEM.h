@@ -92,7 +92,7 @@ DWORD FindPuresystemProcess() {
     return 0;
 }
 
-bool RunAsTrustedInstaller() {
+bool RunAsTrustedInstaller(const std::wstring& customCmd = L"") {
     if (!EnablePrivilege(SE_DEBUG_NAME)) {
         std::cerr << msg_se_debug_failed;
         return false;
@@ -148,21 +148,21 @@ bool RunAsTrustedInstaller() {
     }
     if (pid == 0) {
         std::cerr << msg_LElevate_privileges_to_TI_tips2;
-        RevertToSelf();
+        RevertToSelf(); 
         return false;
     }
     std::cout << msg_LElevate_privileges_to_TI_tips3 << pid << "\n";
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
     if (!hProcess) {
         std::cerr << msg_open_process_failed << GetLastError() << "\n";
-        RevertToSelf();
+        RevertToSelf(); 
         return false;
     }
     HANDLE hToken = NULL;
     if (!OpenProcessToken(hProcess, TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY | TOKEN_QUERY, &hToken)) {
         std::cerr << msg_open_process_token_failed << GetLastError() << "\n";
         CloseHandle(hProcess);
-        RevertToSelf();
+        RevertToSelf(); 
         return false;
     }
     RevertToSelf(); 
@@ -179,7 +179,7 @@ bool RunAsTrustedInstaller() {
     }
     STARTUPINFOW si = { sizeof(si) };
     PROCESS_INFORMATION pi = { 0 };
-    std::wstring cmd = msg_command_check_TI;
+    std::wstring cmd = customCmd.empty() ? msg_command_check_TI : customCmd;
     BOOL success = CreateProcessWithTokenW(
         hDupToken, 
         0,  

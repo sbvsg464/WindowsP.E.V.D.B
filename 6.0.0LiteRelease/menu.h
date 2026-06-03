@@ -38,26 +38,33 @@ here:
             std::system("pause");
             goto here;
         case '6':
-        std::system("cls");
+            std::system("cls");
             {
                 if (IsTrustedInstaller()) {
-                std::cout << msg_already_ti;
-                std::cout << msg_no_need_repeat_elevation;
-                std::system("pause");
-                goto here;
+                    std::cout << msg_already_ti;
+                    std::cout << msg_no_need_repeat_elevation;
+                    std::system("pause");
+                    goto here;
                 }
                 std::cout << msg_please_wait;
-                char currentPath[MAX_PATH];
-                GetModuleFileNameA(NULL, currentPath, MAX_PATH);
-                std::string psCmd = "powershell -NoProfile -ExecutionPolicy Bypass -Command \""
-                    "Install-Module -Name NtObjectManager -Force -Scope CurrentUser -ErrorAction SilentlyContinue; "
-                    "Import-Module NtObjectManager; "
-                    "sc.exe start TrustedInstaller; "
-                    "Set-NtTokenPrivilege SeDebugPrivilege; "
-                    "$p = Get-NtProcess -Name TrustedInstaller.exe; "
-                    "New-Win32Process '" + std::string(currentPath) + "' -CreationFlags NewConsole -ParentProcess $p"
-                    "\"";
-                std::system(psCmd.c_str());
+                WCHAR currentPathW[MAX_PATH];
+                GetModuleFileNameW(NULL, currentPathW, MAX_PATH);
+                std::wstring currentPathStr = L"\"" + std::wstring(currentPathW) + L"\"";
+                std::cout << msg_Elevate_privileges_to_TI_tips;
+                if (!RunAsTrustedInstaller(currentPathStr)) {
+                    std::cerr << msg_Elevate_privileges_to_TI_tips2;
+                    char currentPathA[MAX_PATH];
+                    GetModuleFileNameA(NULL, currentPathA, MAX_PATH);
+                    std::string psCmd = "powershell -NoProfile -ExecutionPolicy Bypass -Command \""
+                        "Install-Module -Name NtObjectManager -Force -Scope CurrentUser -ErrorAction SilentlyContinue; "
+                        "Import-Module NtObjectManager; "
+                        "sc.exe start TrustedInstaller; "
+                        "Set-NtTokenPrivilege SeDebugPrivilege; "
+                        "$p = Get-NtProcess -Name TrustedInstaller.exe; "
+                        "New-Win32Process '" + std::string(currentPathA) + "' -CreationFlags NewConsole -ParentProcess $p"
+                        "\"";
+                    std::system(psCmd.c_str());
+                }
                 std::system("pause");
                 goto here;
             }
