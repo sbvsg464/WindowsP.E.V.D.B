@@ -93,20 +93,89 @@ WindowsPrivilegeEscalationVulnerabilityDisplayBox是一个Windows可执行（exe
 ### 目前已实现的功能
 
 * 更改PowerShell运行策略
+> 如果运行其他功能报错，请优先尝试用此功能把powershell运行策略改至Bypass！
+> <br>在<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> 测试通过 其他未测试
 * 获取以Administrator接管文件/文件夹的功能
+> <br>在<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> 测试通过 其他未测试
 * 提权至SYSTEM
+> <br>在<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> 测试通过 其他未测试
 * 提权至TrustedInstaller
+> <br>在<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> 测试通过 其他未测试
 * 检测本程序的权限
+> <br>在<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> 测试通过 其他未测试
 * 将本程序提权到TrustedInstaller
+> <br>在<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> 测试通过 其他未测试
 * 强制打开Administrator账户（支持Windows 7、8、8.x、10、11，支持Home系列）
+> <br>在<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> 测试通过 其他未测试
 * 让此账户获取指定文件夹的完全控制权限
+> <br>在<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> 测试通过 其他未测试
 * 打印所有特权进程
+> 暂时无法区分TI和SYSTEM特权
+> <br>在<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> 测试通过 其他未测试
 
 ### 正在实现的功能
 
 * 不惊动UAC的情况下提权到Administrator
+> 仅实验性，无法通杀，使用时需要关闭杀毒软件
 * 支持英文
-* 添加以TrustedInstaller权限启动程序功能
+> AI翻译，表意可能不准
+> <br>在<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> 测试通过 其他未测试
+* 添加以程序当前权限启动指定程序功能
+> 意思是如果程序是administrator权限，就用该权限启动指定程序，TI权限亦然<br>
+> 暂不支持SYSTEM权限
+> <br>在<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> 测试通过 其他未测试
+* 支持X86_i386架构
+> 请下载release页面X86_i386专版
+> <br>在<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> 测试通过 其他未测试
+* 支持ARM64架构
+> 请下载release页面ARM64专版
+> <br>在<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> 测试通过 其他未测试
+* 完全支持Windows 7 8 8.x
+> 未测试
+* 更加安全的提权策略(先尝试本地提权再尝试云端提权)
+> <br>在<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> 测试通过 其他未测试
 
 ### 对于即将发布的V6版本
 
