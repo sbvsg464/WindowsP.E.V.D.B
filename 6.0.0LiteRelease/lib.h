@@ -126,6 +126,16 @@ struct LanguagePack {
     std::wstring arch_mismatch_body;
     std::wstring ExpectedArch;
     std::wstring CurrentArch;
+    std::string Elevate_privileges_to_SYSTEM_tips;
+    std::string Elevate_privileges_to_SYSTEM_tips2;
+    std::string Elevate_privileges_to_TI_tips;
+    std::string Elevate_privileges_to_TI_tips2;
+    std::string LElevate_privileges_to_TI_tips;
+    std::string LElevate_privileges_to_TI_tips2;
+    std::string LElevate_privileges_to_TI_tips3;
+    std::wstring command_check_TI;
+    std::wstring command_check_SYSTEM;
+    std::string LElevate_privileges_to_TI_tips4;
 };
 
 inline const LanguagePack LangCN = {
@@ -244,7 +254,17 @@ h.help: 显示此帮助信息
     .arch_mismatch_title = L"致命错误!",
     .arch_mismatch_body = L"此程序的架构与系统架构不匹配",
     .ExpectedArch = L" 期望架构: ",
-    .CurrentArch = L" 系统架构: "
+    .CurrentArch = L" 系统架构: ",
+    .Elevate_privileges_to_SYSTEM_tips = "[*] 正在尝试提权到 SYSTEM 权限...\n",
+    .Elevate_privileges_to_SYSTEM_tips2 = "[-] 直接窃取失败，尝试先提权到 TrustedInstaller 再提权至 SYSTEM...\n",
+    .Elevate_privileges_to_TI_tips = "[*] 优先尝试本地方案提权到 TrustedInstaller 权限...\n",
+    .Elevate_privileges_to_TI_tips2 = "[-] 本地方案失败，正在尝试通过网络方案提权到 TrustedInstaller 权限\n",
+    .LElevate_privileges_to_TI_tips = "[*] 正在唤醒 TrustedInstaller 服务...\n",
+    .LElevate_privileges_to_TI_tips2 = "[-] 无法找到 TrustedInstaller 进程，唤醒服务失败！\n",
+    .LElevate_privileges_to_TI_tips3 = "[+] 成功捕获 TrustedInstaller 进程 PID: ",
+    .command_check_TI = L"cmd.exe /k \"whoami /groups | findstr Trusted && echo [如果有TI则说明成功获取了TI权限]&pause\"",
+    .command_check_SYSTEM = L"cmd.exe /k \"whoami /user && echo 检查是否有SYSTEM权限:&whoami /groups | findstr Trusted && echo [如果有TI和没有SYSTEM则说明是TI权限，如果没有TI和SYSTEM则说明是SYSTEM权限]&pause\"",
+    .LElevate_privileges_to_TI_tips4 = "[+] 成功创建 TrustedInstaller 特权进程，PID: "
 };
 
 inline const LanguagePack LangEN = {
@@ -363,7 +383,17 @@ h. help: Show this help message.
     .arch_mismatch_title = L"Fatal Error!",
     .arch_mismatch_body = L"This program's architecture does not match the system architecture. Expected: ARM64 Current: ",
     .ExpectedArch = L" Expected Architecture: ",
-    .CurrentArch = L" Current Architecture: "
+    .CurrentArch = L" Current Architecture: ",
+    .Elevate_privileges_to_SYSTEM_tips = "[*] Attempting to elevate to SYSTEM privileges...\n",
+    .Elevate_privileges_to_SYSTEM_tips2 = "[-] Direct token stealing failed, trying to elevate to SYSTEM via TrustedInstaller...\n",
+    .Elevate_privileges_to_TI_tips = "[*] Attempting to elevate to TrustedInstaller privileges using local method first...\n",
+    .Elevate_privileges_to_TI_tips2 = "[-] Local method failed, trying to elevate to TrustedInstaller privileges via network method...\n",
+    .LElevate_privileges_to_TI_tips = "[*] Attempting to wake up TrustedInstaller service...\n",
+    .LElevate_privileges_to_TI_tips2 = "[-] Failed to wake up service, possibly due to insufficient privileges or system anomalies. Unable to elevate to TrustedInstaller privileges.\n",
+    .LElevate_privileges_to_TI_tips3 = "[+] Successfully found TrustedInstaller process, PID: ",
+    .command_check_TI = L"cmd.exe /k \"whoami /groups | findstr Trusted && echo [If you have TI privileges, it means you have successfully acquired TI privileges]&pause\"",
+    .command_check_SYSTEM = L"cmd.exe /k \"whoami /user && echo Checking for SYSTEM privileges:&whoami /groups | findstr Trusted && echo [If you have TI and no SYSTEM, it means you have TI privileges. If you have no TI and have SYSTEM, it means you have SYSTEM privileges]&pause\"",
+    .LElevate_privileges_to_TI_tips4 = "[+] Successfully created TrustedInstaller privileged process, PID: "
 };
 
 inline LanguagePack CurrentLang = LangCN;
@@ -423,6 +453,16 @@ inline std::wstring& msg_arch_mismatch_title = CurrentLang.arch_mismatch_title;
 inline std::wstring& msg_arch_mismatch_body = CurrentLang.arch_mismatch_body;
 inline std::wstring& ExpectedArch = CurrentLang.ExpectedArch;
 inline std::wstring& CurrentArch = CurrentLang.CurrentArch;
+inline std::string& msg_Elevate_privileges_to_SYSTEM_tips = CurrentLang.Elevate_privileges_to_SYSTEM_tips;
+inline std::string& msg_Elevate_privileges_to_SYSTEM_tips2 = CurrentLang.Elevate_privileges_to_SYSTEM_tips2;
+inline std::string& msg_Elevate_privileges_to_TI_tips = CurrentLang.Elevate_privileges_to_TI_tips;
+inline std::string& msg_Elevate_privileges_to_TI_tips2 = CurrentLang.Elevate_privileges_to_TI_tips2;
+inline std::string& msg_LElevate_privileges_to_TI_tips = CurrentLang.LElevate_privileges_to_TI_tips;
+inline std::string& msg_LElevate_privileges_to_TI_tips2 = CurrentLang.LElevate_privileges_to_TI_tips2;
+inline std::string& msg_LElevate_privileges_to_TI_tips3 = CurrentLang.LElevate_privileges_to_TI_tips3;
+inline std::wstring& msg_command_check_TI = CurrentLang.command_check_TI;
+inline std::wstring& msg_command_check_SYSTEM = CurrentLang.command_check_SYSTEM;
+inline std::string& msg_LElevate_privileges_to_TI_tips4 = CurrentLang.LElevate_privileges_to_TI_tips4;
 
 inline bool isEnglishSystem() {
     return GetUserDefaultUILanguage() == 0x0409;
