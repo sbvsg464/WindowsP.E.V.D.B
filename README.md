@@ -25,23 +25,92 @@ A bug within a system, program, service, or driver that allows an attacker to ga
 **Key point:**
 It is not about "already having permissions," but rather "getting permissions you shouldn't have."
 
-### Features
+### Currently Implemented Features
 
 * Modify PowerShell execution policy
-* Take ownership of files and directories as Administrator
+> If running other features throws an error, please try using this feature to change the PowerShell execution policy to Bypass first!
+> <br>Passed testing on<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> Other versions untested
+* Take ownership of files/folders as Administrator
+> <br>Passed testing on<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> Other versions untested
 * Elevate privileges to SYSTEM
+> <br>Passed testing on<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> Other versions untested
 * Elevate privileges to TrustedInstaller
+> <br>Passed testing on<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> Other versions untested
 * Check the current permissions of this program
+> <br>Passed testing on<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> Other versions untested
 * Elevate the permissions of this program to TrustedInstaller
+> <br>Passed testing on<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> Other versions untested
 * Forcefully enable the Administrator account (compatible with Windows 7, 8, 8.x, 10, and 11; supports Home editions)
+> <br>Passed testing on<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> Other versions untested
 * Grant this account full control permissions for a specified folder
+> <br>Passed testing on<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> Other versions untested
 * Print all privileged processes
+> Currently unable to distinguish between TI and SYSTEM privileges.
+> <br>Passed testing on<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> Other versions untested
 
-### Planned Features
+### Features Currently Being Implemented
 
-* UAC bypass to Administrator
+* UAC bypass to Administrator without triggering prompts
+> Experimental only, not universal, requires disabling antivirus software when using.
 * Support for English
-* Add the ability to launch programs with TrustedInstaller privileges
+> AI translated, expressions might not be 100% accurate.
+> <br>Passed testing on<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> Other versions untested
+* Add the ability to launch specified programs with the current program's privileges
+> Meaning if the program has Administrator privileges, it launches the specified program with those privileges; the same applies to TI privileges.<br>
+> Currently does not support SYSTEM privileges.
+> <br>Passed testing on<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> Other versions untested
+* Support for X86_i386 architecture
+> Please download the dedicated X86_i386 version from the releases page.
+> <br>Passed testing on<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> Other versions untested
+* Support for ARM64 architecture
+> Please download the dedicated ARM64 version from the releases page.
+> <br>Passed testing on<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> Other versions untested
+* Full support for Windows 7, 8, 8.x
+> Untested
+* Safer privilege escalation strategy (Try local escalation first, then fallback to cloud escalation)
+> <br>Passed testing on<br>
+> Windows 11 Pro 25H2 26200.6584 <br>
+> Windows 10 Enterprise LTSC 21H2 19044.1288<br>
+> Other versions untested
 
 ### Regarding the Upcoming V6 Release
 
