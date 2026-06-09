@@ -1,0 +1,55 @@
+name: Windows MSVC Direct CLI Build
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    name: Build for ${{ matrix.arch_name }}
+    runs-on: windows-latest # 微软官方提供的原生环境，内置了完整 MSVC 命令行工具链
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch_name: x86_64
+            msvc_arch: x64         # 原生 x64 编译器
+          - arch_name: x86_i386
+            msvc_arch: x86         # 原生 x86 编译器
+          - arch_name: ARM64
+            msvc_arch: x64_arm64   # 使用 x64 宿主机交叉编译成 ARM64 程序
+
+    steps:
+    # 1. 拉取纯源码文件
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. 初始化 MSVC 命令行环境变量（在后台打开 Developer Command Prompt）
+    - name: Setup MSVC Developer Command Prompt
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: ${{ matrix.msvc_arch }}
+
+    # 3. 直接调用 cl.exe 编译纯源码
+    # /EHsc: 启用标准 C++ 异常处理
+    # /O2: 开启速度优化
+    # /MT: 强行静态链接多线程运行时库（使独立生成的 exe 摆脱 vcruntime 依赖）
+    - name: Compile with cl.exe
+      run: |
+        cl.exe /EHsc /O2 /MT /FE:WPEVDB_base.exe *.cpp
+
+    # 🚀 按照你的步骤：将生成的基准 exe 重命名为带架构后缀的格式
+    - name: Rename Executable
+      run: |
+        Rename-Item -Path "WPEVDB_base.exe" -NewName "WPEVDB_${{ matrix.arch_name }}.exe"
+      
+    # 4. 收集并上传对应的 .exe 产物，不推送 release
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: WPEVDB-${{ matrix.arch_name }}
+        # 使用通配符在目录中精准捕获重命名后的独立可执行文件
+        path: "**/WPEVDB_${{ matrix.arch_name }}.exe"
