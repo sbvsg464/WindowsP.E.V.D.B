@@ -40,11 +40,9 @@ jobs:
     # 让 PowerShell 自动搜索并调用 cl.exe 编译
     - name: Compile with cl.exe
       run: |
-        # 自动扫描当前目录及其所有子目录下的 .cpp 文件
         $CppFiles = Get-ChildItem -Path . -Filter *.cpp -Recurse | Select-Object -ExpandProperty FullName
         
-        # 将找到的所有文件一次性传给 cl.exe 进行编译
-        cl.exe /EHsc /O2 /MT /std:c++20 /Fe:WPEVDB_base.exe $CppFiles
+        cl.exe /EHsc /O2 /MT /std:c++latest /Fe:WPEVDB_base.exe $CppFiles user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib
     # 🚀 将生成的基准 exe 重命名为带架构后缀的格式
     - name: Rename Executable
       run: |
