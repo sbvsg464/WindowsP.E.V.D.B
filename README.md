@@ -117,6 +117,9 @@ It is not about "already having permissions," but rather "getting permissions yo
 The V6 version will be divided into Pro and Lite versions. The Pro version will feature a GUI, while the Lite version will not, but this does not mean the Pro version will be a paid release.
 I think the only difference between them is that the Lite version will receive updates faster, while the Pro version will update slower.
 
+### Participating in Beta Testing
+**Head over to the Actions page to check the latest CI builds—that is the newest beta version!**
+
 ### Have your own ideas?
 
 Feel free to submit Issues!
@@ -250,6 +253,9 @@ WindowsPrivilegeEscalationVulnerabilityDisplayBox是一个Windows可执行（exe
 
 V6版本将分为Pro和Lite版本，Pro版本拥有GUI，Lite没有，但这并不意味着Pro版本要收费。
 我想他们唯一的区别就是Lite更新的快，Pro更新的慢吧。
+
+### 关于参与内测
+**自行前往action页面查看最新的CI构建，那就是最新的测试版本!**
 
 ### 有自己的想法吗？
 
