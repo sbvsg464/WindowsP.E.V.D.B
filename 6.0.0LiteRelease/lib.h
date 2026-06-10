@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <format>
 #include <vector>
+#include <chrono>
 #include <thread>
 #include <atomic>
 #include <algorithm>
@@ -41,6 +42,8 @@
 #ifndef SE_IMPERSONATE_NAME
 #define SE_IMPERSONATE_NAME TEXT("SeImpersonatePrivilege")
 #endif
+
+int index = 0, max_index = 1;
 
 inline std::wstring ExpectedArchStr;
 inline std::wstring CurrentArchStr;
@@ -136,6 +139,11 @@ struct LanguagePack {
     std::wstring command_check_TI;
     std::wstring command_check_SYSTEM;
     std::string LElevate_privileges_to_TI_tips4;
+    std::string min_pages_tips;
+    std::string max_pages_tips;
+    std::string welcome1;
+    std::string help_text1;
+    std::string sm_cmd_tips1;
 };
 
 inline const LanguagePack LangCN = {
@@ -152,12 +160,14 @@ inline const LanguagePack LangCN = {
 9.打印所有特权进程
 0.以本程序权限唤醒指定exe
 a.关于本程序
+p.上一页
+n.下一页
 e.exit
 h.help
 )",
     .admin_req_body = L"正在尝试申请Administrator权限",
     .admin_req_title = L"权限不足",
-    .admin_success_body = L"申请Administrator权限成功\n请在新弹窗里操作！\n点击这个弹窗的任何部分都将关闭两个窗口！",
+    .admin_success_body = L"申请Administrator权限成功\n请在新弹窗里操作！\n如果是调试启动，点击父窗口或此弹窗的任意部分都会关闭两个窗口！\t如果是非调试启动，就不用在意",
     .tips_title = L"提示",
     .admin_fail_body = L"申请Administrator权限失败，请尝试手动给予Administrator权限",
     .failed_title = L"失败",
@@ -166,8 +176,14 @@ h.help
     .about_text = R"(关于本程序(WindowsPrivilegeEscalationVulnerabilityDisplayBox Version:6.0.0 Lite):
 作者:3635177522(QQ号)
 鸣谢:
-C++(最好的编程语言!)
-Visual Studio Code(宇宙最强的平台!)
+C++(作为本程序的源码语言!
+C语言让你很容易射中自己的脚；C++ 让这变得困难一些，但一旦你做到了，它会把你的整条腿都炸飞!--来自Bjarne Stroustrup[C++之父])
+Visual Studio Code(提供对本程序X86_64的编译支持)
+Visual Studio 2026(提供对本程序X86_i386和ARM64的编译支持)
+Git(提供版本控制和代码管理)
+Github(提供代码托管和版本控制)
+你(感谢你使用这个程序！)
+
 Google Gemini && Microsoft Github Copilot(最强大的AI!)
 
 编译命令:cmd /c chcp 65001>nul && 【你的g++.exe路径】 -fdiagnostics-color=always -s 【你的main.cpp路径】 -o 【你的生成的exe路径】 -O3 -std=c++20 -ladvapi32 -luserenv -lwtsapi32 -Wpsabi -lnetapi32 -lwevtapi -static-libgcc -static-libstdc++
@@ -185,6 +201,8 @@ Google Gemini && Microsoft Github Copilot(最强大的AI!)
 9.打印所有特权进程: 列出当前系统中所有拥有特权令牌的进程及其对应的用户信息
 0.以本程序权限唤醒指定exe: 使用当前程序权限启动指定的可执行文件
 a.关于本程序: 显示程序相关信息
+p.previous: 返回上一页
+n.next: 前往下一页
 e.exit: 退出程序
 h.help: 显示此帮助信息
 )",
@@ -264,7 +282,27 @@ h.help: 显示此帮助信息
     .LElevate_privileges_to_TI_tips3 = "[+] 成功捕获 TrustedInstaller 进程 PID: ",
     .command_check_TI = L"cmd.exe /k \"whoami /groups | findstr Trusted && echo [如果有TI则说明成功获取了TI权限]&pause\"",
     .command_check_SYSTEM = L"cmd.exe /k \"whoami /user && echo 检查是否有SYSTEM权限:&whoami /groups | findstr Trusted && echo [如果有TI和没有SYSTEM则说明是TI权限，如果没有TI和SYSTEM则说明是SYSTEM权限]&pause\"",
-    .LElevate_privileges_to_TI_tips4 = "[+] 成功创建 TrustedInstaller 特权进程，PID: "
+    .LElevate_privileges_to_TI_tips4 = "[+] 成功创建 TrustedInstaller 特权进程，PID: ",
+    .min_pages_tips = "已到达第一页!",
+    .max_pages_tips = "已到达最后一页!",
+    .welcome1 = R"(欢迎!版本:6.0.0 Lite
+请选择你想要的提权操作:
+1.智能终端
+a.关于本程序
+p.上一页
+n.下一页
+e.exit
+h.help
+)",
+    .help_text1 = R"(帮助中心(介绍什么时候他们有用):
+1.智能终端: 开发中......
+a.关于本程序: 显示程序相关信息
+p.previous: 返回上一页
+n.next: 前往下一页
+e.exit: 退出程序
+h.help: 显示此帮助信息
+)",
+    .sm_cmd_tips1 = "正在开发中，敬请期待！\n"
 };
 
 inline const LanguagePack LangEN = {
@@ -281,26 +319,34 @@ Please select the privilege escalation operation you want:
 9. List all privileged processes
 0. Launch specified exe with current privileges
 a. About this program
+p. Previous
+n. Next
 e. Exit
 h. Help
 )",
     .admin_req_body = L"Attempting to request Administrator privileges...",
     .admin_req_title = L"Insufficient Privileges",
-    .admin_success_body = L"Successfully requested Administrator privileges.\nPlease operate in the new popup!\nClicking any part of this window will close both windows!",
+    .admin_success_body = L"Successfully requested Administrator privileges!\nPlease operate in the new window!\nIf launched with debugging, clicking any part of the parent or this popup will close both windows!\tIf launched without debugging, you can ignore this.",
     .tips_title = L"Information",
     .admin_fail_body = L"Failed to request Administrator privileges. Please try running this program as Administrator manually.",
     .failed_title = L"Error",
     .owner_change_failed = L"[-] Failed to change owner, error code: ",
     .take_ownership_success = "[+] Operation completed, press any key to return to the main menu...\nNow, right-click a file and you will see an option \"Take Ownership (Admin)\", click it to grant the Administrator group full ownership and control permissions of the file.\n",
-    .about_text = R"(About This Program (WindowsPrivilegeEscalationVulnerabilityDisplayBox Version:6.0.0 Lite):
-Author: 3635177522 (QQ)
-Credits:
-C++ (The Best Programming Language!)
-Visual Studio Code (The Most Powerful IDE!)
-Google Gemini && Microsoft Github Copilot(The Most Powerful AI!)
-
-Build Command: cmd /c chcp 65001>nul && 【Your g++.exe Path】 -fdiagnostics-color=always -s 【Your main.cpp Path】 -o 【Your Output exe Path】 -O3 -std=c++20 -ladvapi32 -luserenv -lwtsapi32 -Wpsabi -lnetapi32 -lwevtapi -static-libgcc -static-libstdc++
-Support: Please star my GitHub project~ Link: https://github.com/sbvsg464/WindowsPrivilegeEscalationVulnerabilityDisplayBox
+    .about_text = R"(About this program (WindowsPrivilegeEscalationVulnerabilityDisplayBox Version: 6.0.0 Lite):
+    Author: 3635177522 (QQ number)
+    Acknowledgements:
+    C++ (The programming language used for this program's source code!
+    C makes it easy to shoot yourself in the foot; C++ makes it harder, but once you do, it blows off your whole leg! -- from Bjarne Stroustrup [the father of C++])
+    Visual Studio Code (Provides compilation support for X86_64 architecture)
+    Visual Studio 2026 (Provides compilation support for X86_i386 and ARM64 architectures)
+    Git (Provides version control and code management)
+    Github (Provides code hosting and version control)
+    You (Thank you for using this program!)
+    
+    Google Gemini && Microsoft Github Copilot (The most powerful AI!)
+    
+    Compilation command: cmd /c chcp 65001>nul && 【your g++.exe path】 -fdiagnostics-color=always -s 【your main.cpp path】 -o 【your output exe path】 -O3 -std=c++20 -ladvapi32 -luserenv -lwtsapi32 -Wpsabi -lnetapi32 -lwevtapi -static-libgcc -static-libstdc++
+    Sponsor: Please give a star to my GitHub project~ Link: https://github.com/sbvsg464/WindowsPrivilegeEscalationVulnerabilityDisplayBox
 )",
     .help_text = R"(Help Center (Explains when they are useful):
 1. Change PowerShell Execution Policy: Use when blocked from executing .ps1 scripts; it's not an issue with your code!
@@ -314,6 +360,8 @@ Support: Please star my GitHub project~ Link: https://github.com/sbvsg464/Window
 9. List all privileged processes: List all processes with privileged tokens and their corresponding user information in the current system.
 0. Launch specified exe with current privileges: Start a specified executable file with the current program's privileges.
 a. About this program: Show program information.
+p.previous: Return to the previous page.
+n.next: Go to the next pag
 e. exit: Exit the program.
 h. help: Show this help message.
 )",
@@ -393,7 +441,27 @@ h. help: Show this help message.
     .LElevate_privileges_to_TI_tips3 = "[+] Successfully found TrustedInstaller process, PID: ",
     .command_check_TI = L"cmd.exe /k \"whoami /groups | findstr Trusted && echo [If you have TI privileges, it means you have successfully acquired TI privileges]&pause\"",
     .command_check_SYSTEM = L"cmd.exe /k \"whoami /user && echo Checking for SYSTEM privileges:&whoami /groups | findstr Trusted && echo [If you have TI and no SYSTEM, it means you have TI privileges. If you have no TI and have SYSTEM, it means you have SYSTEM privileges]&pause\"",
-    .LElevate_privileges_to_TI_tips4 = "[+] Successfully created TrustedInstaller privileged process, PID: "
+    .LElevate_privileges_to_TI_tips4 = "[+] Successfully created TrustedInstaller privileged process, PID: ",
+    .min_pages_tips = "Already at the first page!",
+    .max_pages_tips = "Already at the last page!",
+    .welcome1 = R"(Welcome! Version: 6.0.0 Lite
+Please select the privilege escalation operation you want:
+1. Intelligent Terminal
+a. About this program
+p. Previous
+n. Next
+e. Exit
+h. Help
+)",
+    .help_text1 = R"(Help Center (Explains when they are useful):
+1. Intelligent Terminal: In development...
+a. About this program: Show program information.
+p.previous: Return to the previous page.
+n.next: Go to the next page.
+e. exit: Exit the program.
+h. help: Show this help message.
+)",
+    .sm_cmd_tips1 = "In development, stay tuned!\n"
 };
 
 inline LanguagePack CurrentLang = LangCN;
@@ -463,6 +531,11 @@ inline std::string& msg_LElevate_privileges_to_TI_tips3 = CurrentLang.LElevate_p
 inline std::wstring& msg_command_check_TI = CurrentLang.command_check_TI;
 inline std::wstring& msg_command_check_SYSTEM = CurrentLang.command_check_SYSTEM;
 inline std::string& msg_LElevate_privileges_to_TI_tips4 = CurrentLang.LElevate_privileges_to_TI_tips4;
+inline std::string& msg_min_pages_tips = CurrentLang.min_pages_tips;
+inline std::string& msg_max_pages_tips = CurrentLang.max_pages_tips;
+inline std::string& msg_welcome1 = CurrentLang.welcome1;
+inline std::string& msg_help_text1 = CurrentLang.help_text1;
+inline std::string& msg_sm_cmd_tips1 = CurrentLang.sm_cmd_tips1;
 
 inline bool isEnglishSystem() {
     return GetUserDefaultUILanguage() == 0x0409;
@@ -492,7 +565,8 @@ std::wstring ReadPasswordMasked() {
 
 void helpCenter() {
     std::system("cls");
-    std::cout << msg_help_text;
+    if (index == 0) std::cout << msg_help_text;
+    else if (index == 1) std::cout << msg_help_text1;
     std::system("pause");
 }
 
