@@ -8,52 +8,60 @@ on:
 
 jobs:
   build:
-    name: Build for ${{ matrix.arch_name }}
-    runs-on: windows-latest # 微软官方提供的原生环境，内置了完整 MSVC 命令行工具链
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch_name: x86_64
-            msvc_arch: x64         # 原生 x64 编译器
-          - arch_name: x86_i386
-            msvc_arch: x86         # 原生 x86 编译器
-          - arch_name: ARM64
-            msvc_arch: x64_arm64   # 使用 x64 宿主机交叉编译成 ARM64 程序
+    name: Multi-Arch Direct Compiler
+    runs-on: windows-latest
 
     steps:
-    # 1. 拉取代码
+    # 1. 浅克隆代码
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
 
-    # 🛡️ 核心修复 1：强行关闭云端 Windows Defender 的实时监控，防止编译产物被当成病毒秒删
+    # 2. 获取当前系统时间（北京时间，格式为 yyyy.MM.dd_HHmm，无冒号安全格式）
+    - name: Set Current Time
+      run: |
+        $TimeStr = (Get-Date).AddHours(8).ToString("yyyy.MM.dd_HHmm")
+        echo "BUILD_TIME=$TimeStr" >> $env:GITHUB_ENV
+      shell: powershell
+
+    # 3. 强行关闭云端 Windows Defender 的实时监控
     - name: Disable Windows Defender
       run: Set-MpPreference -DisableRealtimeMonitoring $true
       shell: powershell
 
-    # 2. 初始化 MSVC 命令行环境变量
-    - name: Setup MSVC Developer Command Prompt
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: ${{ matrix.msvc_arch }}
-
-    # 3. 编译（代码保持不变）
-    - name: Compile with cl.exe
+    # 4. 在单台机器上高效率编译 3 个架构（直接输出带时间戳的文件）
+    - name: Compile All Architectures
+      shell: cmd
       run: |
-        $CppFiles = Get-ChildItem -Path . -Filter *.cpp -Recurse | Select-Object -ExpandProperty FullName
-        cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_base.exe $CppFiles user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib
+        dir /s /b *.cpp > cpp_files.txt
 
-    # 重命名（代码保持不变）
-    - name: Rename Executable
-      run: |
-        Rename-Item -Path "WPEVDB_base.exe" -NewName "WPEVDB_${{ matrix.arch_name }}.exe"
-      
-    # 4. 上传
-    - name: Upload Build Artifacts
+        echo ==================== Compiling x86_64 ====================
+        cmd /c "call \"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat\" x64 && cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_x86_64_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib"
+
+        echo ==================== Compiling x86_i386 ====================
+        cmd /c "call \"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat\" x86 && cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_x86_i386_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib"
+
+        echo ==================== Compiling ARM64 ====================
+        cmd /c "call \"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat\" x64_arm64 && cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_ARM64_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib"
+
+    # 5. 分离上传产物 1：x86_64
+    - name: Upload x86_64 Binary
       uses: actions/upload-artifact@v4
       with:
-        name: WPEVDB-${{ matrix.arch_name }}
-        # 🎯 核心修复 2：去掉 **/ 通配符，直接精准指向当前目录下的 exe
-        path: WPEVDB_${{ matrix.arch_name }}.exe
-    
+        name: WPEVDB-x86_64
+        path: WPEVDB_x86_64_${{ env.BUILD_TIME }}.exe
+
+    # 6. 分离上传产物 2：x86_i386
+    - name: Upload x86_i386 Binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: WPEVDB-x86_i386
+        path: WPEVDB_x86_i386_${{ env.BUILD_TIME }}.exe
+
+    # 7. 分离上传产物 3：ARM64
+    - name: Upload ARM64 Binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: WPEVDB-ARM64
+        path: WPEVDB_ARM64_${{ env.BUILD_TIME }}.exe

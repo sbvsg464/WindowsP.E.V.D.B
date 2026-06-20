@@ -287,7 +287,7 @@ h.help: 显示此帮助信息
     .max_pages_tips = "已到达最后一页!",
     .welcome1 = R"(欢迎!版本:6.0.0 Lite
 请选择你想要的提权操作:
-1.智能终端
+1.以TI权限粉碎文件
 a.关于本程序
 p.上一页
 n.下一页
@@ -445,8 +445,8 @@ h. help: Show this help message.
     .min_pages_tips = "Already at the first page!",
     .max_pages_tips = "Already at the last page!",
     .welcome1 = R"(Welcome! Version: 6.0.0 Lite
-Please select the privilege escalation operation you want:
-1. Intelligent Terminal
+Please select the operation you want:
+1. Crush files with TI privileges
 a. About this program
 p. Previous
 n. Next
