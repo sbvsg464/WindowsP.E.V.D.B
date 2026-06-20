@@ -35,25 +35,36 @@ jobs:
       shell: cmd
       run: dir /s /b *.cpp > cpp_files.txt
 
-    # 🌟 5. 独立步骤：编译 x86_64（极其干净的写法，无需转义嵌套）
+    # 🌟 5. 独立步骤：编译 x86_64
     - name: Compile x86_64
       shell: cmd
       run: |
-        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+        :: 动态获取 VS 真实安装路径并赋值给 VS_PATH
+        set VSWHERE="%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+        for /f "usebackq tokens=*" %%i in (`%VSWHERE% -latest -products * -property installationPath`) do set VS_PATH=%%i
+        
+        :: 调用对应架构环境并编译
+        call "%VS_PATH%\VC\Auxiliary\Build\vcvarsall.bat" x64
         cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_x86_64_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib
 
     # 🌟 6. 独立步骤：编译 x86_i386
     - name: Compile x86_i386
       shell: cmd
       run: |
-        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86
+        set VSWHERE="%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+        for /f "usebackq tokens=*" %%i in (`%VSWHERE% -latest -products * -property installationPath`) do set VS_PATH=%%i
+        
+        call "%VS_PATH%\VC\Auxiliary\Build\vcvarsall.bat" x86
         cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_x86_i386_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib
 
     # 🌟 7. 独立步骤：编译 ARM64
     - name: Compile ARM64
       shell: cmd
       run: |
-        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64_arm64
+        set VSWHERE="%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+        for /f "usebackq tokens=*" %%i in (`%VSWHERE% -latest -products * -property installationPath`) do set VS_PATH=%%i
+        
+        call "%VS_PATH%\VC\Auxiliary\Build\vcvarsall.bat" x64_arm64
         cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_ARM64_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib
 
     # 8. 分离上传产物 1：x86_64
