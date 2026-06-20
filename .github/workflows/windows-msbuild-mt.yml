@@ -34,17 +34,17 @@ jobs:
     - name: Compile All Architectures
       shell: cmd
       run: |
+        :: 利用极速命令搜集所有子目录下的 .cpp 文件并写入临时文件
         dir /s /b *.cpp > cpp_files.txt
 
         echo ==================== Compiling x86_64 ====================
-        cmd /c "call \"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat\" x64 && cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_x86_64_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib"
+        cmd /c "call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64 && cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_x86_64_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib"
 
         echo ==================== Compiling x86_i386 ====================
-        cmd /c "call \"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat\" x86 && cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_x86_i386_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib"
+        cmd /c "call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86 && cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_x86_i386_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib"
 
         echo ==================== Compiling ARM64 ====================
-        cmd /c "call \"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat\" x64_arm64 && cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_ARM64_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib"
-
+        cmd /c "call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64_arm64 && cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_ARM64_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib"
     # 5. 分离上传产物 1：x86_64
     - name: Upload x86_64 Binary
       uses: actions/upload-artifact@v4
