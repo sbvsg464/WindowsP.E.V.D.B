@@ -71,19 +71,19 @@ jobs:
     - name: Upload x86_64 Binary
       uses: actions/upload-artifact@v4
       with:
-        name: WPEVDB-x86_64
+        name: WPEVDB-x86_64_${{ env.BUILD_TIME }}
         path: WPEVDB_x86_64_${{ env.BUILD_TIME }}.exe
 
     # 9. 分离上传产物 2：x86_i386
     - name: Upload x86_i386 Binary
       uses: actions/upload-artifact@v4
       with:
-        name: WPEVDB-x86_i386
+        name: WPEVDB-x86_i386_${{ env.BUILD_TIME }}
         path: WPEVDB_x86_i386_${{ env.BUILD_TIME }}.exe
 
     # 10. 分离上传产物 3：ARM64
     - name: Upload ARM64 Binary
       uses: actions/upload-artifact@v4
       with:
-        name: WPEVDB-ARM64
+        name: WPEVDB-ARM64_${{ env.BUILD_TIME }}
         path: WPEVDB_ARM64_${{ env.BUILD_TIME }}.exe
