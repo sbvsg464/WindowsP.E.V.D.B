@@ -18,7 +18,7 @@ jobs:
       with:
         fetch-depth: 1
 
-    # 2. 获取当前系统时间（北京时间，格式为 yyyy.MM.dd_HHmm，无冒号安全格式）
+    # 2. 获取当前系统时间并注入环境变量
     - name: Set Current Time
       run: |
         $TimeStr = (Get-Date).AddHours(8).ToString("yyyy.MM.dd_HHmm")
@@ -30,36 +30,47 @@ jobs:
       run: Set-MpPreference -DisableRealtimeMonitoring $true
       shell: powershell
 
-    # 4. 在单台机器上高效率编译 3 个架构（直接输出带时间戳的文件）
-    - name: Compile All Architectures
+    # 4. 生成源码文件列表
+    - name: Generate CPP File List
+      shell: cmd
+      run: dir /s /b *.cpp > cpp_files.txt
+
+    # 🌟 5. 独立步骤：编译 x86_64（极其干净的写法，无需转义嵌套）
+    - name: Compile x86_64
       shell: cmd
       run: |
-        :: 利用极速命令搜集所有子目录下的 .cpp 文件并写入临时文件
-        dir /s /b *.cpp > cpp_files.txt
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+        cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_x86_64_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib
 
-        echo ==================== Compiling x86_64 ====================
-        cmd /c "call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64 && cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_x86_64_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib"
+    # 🌟 6. 独立步骤：编译 x86_i386
+    - name: Compile x86_i386
+      shell: cmd
+      run: |
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86
+        cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_x86_i386_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib
 
-        echo ==================== Compiling x86_i386 ====================
-        cmd /c "call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86 && cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_x86_i386_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib"
+    # 🌟 7. 独立步骤：编译 ARM64
+    - name: Compile ARM64
+      shell: cmd
+      run: |
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64_arm64
+        cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_ARM64_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib
 
-        echo ==================== Compiling ARM64 ====================
-        cmd /c "call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64_arm64 && cl.exe /EHsc /O2 /MT /std:c++latest /utf-8 /Fe:WPEVDB_ARM64_%BUILD_TIME%.exe @cpp_files.txt user32.lib shell32.lib advapi32.lib userenv.lib wtsapi32.lib netapi32.lib wevtapi.lib"
-    # 5. 分离上传产物 1：x86_64
+    # 8. 分离上传产物 1：x86_64
     - name: Upload x86_64 Binary
       uses: actions/upload-artifact@v4
       with:
         name: WPEVDB-x86_64
         path: WPEVDB_x86_64_${{ env.BUILD_TIME }}.exe
 
-    # 6. 分离上传产物 2：x86_i386
+    # 9. 分离上传产物 2：x86_i386
     - name: Upload x86_i386 Binary
       uses: actions/upload-artifact@v4
       with:
         name: WPEVDB-x86_i386
         path: WPEVDB_x86_i386_${{ env.BUILD_TIME }}.exe
 
-    # 7. 分离上传产物 3：ARM64
+    # 10. 分离上传产物 3：ARM64
     - name: Upload ARM64 Binary
       uses: actions/upload-artifact@v4
       with:
